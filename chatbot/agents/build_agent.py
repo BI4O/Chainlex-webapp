@@ -45,6 +45,182 @@ CONTRACT_STEPS = {
     6: "Final Review - Review and confirm the complete contract",
 }
 
+# Step-specific content generation prompts
+STEP_CONTENT_PROMPTS = {
+    0: """Based on the conversation, generate a structured summary for the Asset Onboarding section.
+Format your response EXACTLY as follows (use Markdown):
+
+## 资产概述
+
+### 基本信息
+- **项目名称**: [Generate a professional project name, e.g., "银河大厦RWA代币化项目"]
+- **资产类型**: [Asset type]
+- **地理位置**: [Location if mentioned]
+- **资产描述**: [Brief description]
+
+### 资产特征
+- **规模**: [Size/scale if mentioned]
+- **状态**: [Current status if mentioned]
+- **其他**: [Other relevant info]
+
+Only include information that was actually provided. Use "待补充" for missing information.""",
+
+    1: """Based on the conversation, generate a structured summary for the Valuation section.
+Format your response EXACTLY as follows:
+
+## 估值方案
+
+### 估值方法
+- **采用方法**: [Valuation method discussed]
+- **数据来源**: [Oracle/data source]
+
+### 估值结果
+- **估值金额**: [Valuation amount]
+- **评估机构**: [Valuation provider if mentioned]
+- **评估日期**: [Date if mentioned]
+
+### 估值依据
+[Brief explanation of valuation basis]
+
+Only include information that was actually provided.""",
+
+    2: """Generate structured Yield Design section:
+
+## 收益设计
+
+### 收益分配
+- **预期年化收益率**: [Yield rate]
+- **分配频率**: [Distribution frequency]
+- **计算方式**: [Calculation method]
+
+### 收益来源
+[Description of yield sources]
+
+Only include provided information.""",
+
+    3: """Generate structured Legal Structure section:
+
+## 法律架构
+
+### SPV架构
+- **架构类型**: [SPV type]
+- **注册地**: [Jurisdiction]
+- **法律顾问**: [Legal advisor if mentioned]
+
+### 合规要点
+[Key compliance considerations]
+
+Only include provided information.""",
+
+    4: """Generate structured Compliance section:
+
+## 合规安排
+
+### 投资者资格
+- **合格投资者要求**: [Requirements]
+- **KYC/AML**: [Procedures]
+
+### 监管合规
+- **适用法规**: [Applicable regulations]
+- **备案要求**: [Filing requirements]
+
+Only include provided information.""",
+
+    5: """Generate structured Tokenomics section:
+
+## 代币经济模型
+
+### 代币发行
+- **代币名称**: [Token name]
+- **代币符号**: [Token symbol]
+- **发行总量**: [Total supply]
+- **代币精度**: [Decimals]
+
+### 分配方案
+[Token distribution plan]
+
+Only include provided information.""",
+
+    6: """Generate Final Review summary combining all completed sections.
+Create a comprehensive summary of the entire whitepaper."""
+}
+
+TITLE_GENERATION_PROMPT = """Based on the conversation, generate a concise, professional title for this RWA tokenization project.
+
+Rules:
+1. Maximum 30 characters in Chinese or 40 characters in English
+2. Format: [Asset Name] + [RWA/代币化] if applicable
+3. Examples: "银河大厦RWA", "上海浦东写字楼代币化", "Manhattan Office RWA"
+4. If not enough information, return "待命名项目"
+
+Return ONLY the title, nothing else."""
+
+
+def generate_step_content(
+    step: int,
+    phase: str,
+    history: list,
+    asset_data: Dict[str, Any]
+) -> str:
+    """Generate structured content for a completed step"""
+    try:
+        # Get the content prompt for this step
+        if phase == "whitepaper" and step in STEP_CONTENT_PROMPTS:
+            content_prompt = STEP_CONTENT_PROMPTS[step]
+        else:
+            return ""
+
+        # Create a summary agent
+        summary_prompt = f"""
+You are a professional RWA documentation assistant.
+
+{content_prompt}
+
+Conversation history to extract information from:
+{chr(10).join([f"{m.get('role', 'user')}: {m.get('content', '')}" for m in history[-10:]])}
+
+Current asset data: {asset_data}
+
+Generate the structured content now. Use Chinese for all content.
+"""
+
+        # Run LLM to generate structured content
+        response = llm.invoke(summary_prompt)
+        return response.content if hasattr(response, 'content') else str(response)
+
+    except Exception as e:
+        return f"内容生成错误: {str(e)}"
+
+
+def generate_project_title(
+    history: list,
+    asset_data: Dict[str, Any]
+) -> str:
+    """Generate a professional project title"""
+    try:
+        summary_prompt = f"""
+{TITLE_GENERATION_PROMPT}
+
+Conversation history:
+{chr(10).join([f"{m.get('role', 'user')}: {m.get('content', '')}" for m in history[-6:]])}
+
+Current asset data: {asset_data}
+
+Generate the title now. Return ONLY the title.
+"""
+
+        response = llm.invoke(summary_prompt)
+        title = response.content if hasattr(response, 'content') else str(response)
+        # Clean up the title
+        title = title.strip().strip('"\'')
+        if len(title) > 40:
+            title = title[:37] + "..."
+        return title
+
+    except Exception as e:
+        return "待命名项目"
+
+
 def get_system_prompt(phase: str, current_step: int, completed_steps: list) -> str:
     """Generate system prompt based on current phase and step"""
 

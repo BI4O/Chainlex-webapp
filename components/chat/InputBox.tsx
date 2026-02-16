@@ -160,13 +160,25 @@ export function InputBox() {
         );
 
         // Detect step completion signals in AI response
-        const stepCompleteSignals = ['let\'s move to', 'next step', 'proceed to', 'now we can', '进入下一步', '继续下一步'];
+        const stepCompleteSignals = ['let\'s move to', 'next step', 'proceed to', 'now we can', '进入下一步', '继续下一步', '接下来'];
         const aiSuggestsNextStep = stepCompleteSignals.some(signal =>
           responseContent.includes(signal)
         );
 
         // If user confirms or AI suggests next step, mark current step as complete
         if (hasConfirmIntent || aiSuggestsNextStep) {
+          // Get current state for API call
+          const currentMessages = useLexstudioStore.getState().messages;
+          const currentAssetData = useLexstudioStore.getState().assetData;
+
+          // Generate structured content via API
+          generateStepContentViaAPI(currentStep, phase, currentMessages, currentAssetData);
+
+          // Generate/update project title (especially for first step)
+          if (currentStep === 0) {
+            generateTitleViaAPI(currentMessages, currentAssetData);
+          }
+
           // Add current step to completed steps
           if (!completedSteps.includes(currentStep)) {
             addCompletedStep(currentStep);
@@ -176,9 +188,6 @@ export function InputBox() {
           if (currentStep < 6) {
             setCurrentStep(currentStep + 1);
           }
-
-          // Generate content snippet based on current step
-          generateContentSnippet(currentStep, phase, streamingContentRef.current);
         }
 
         // Update asset data based on user input
@@ -189,22 +198,73 @@ export function InputBox() {
     }
   };
 
-  // Helper function to generate content snippet for whitepaper/contract
-  const generateContentSnippet = (step: number, phase: string, aiResponse: string) => {
-    const steps = phase === 'whitepaper'
-      ? ['Asset Onboarding', 'Valuation', 'Yield Design', 'Legal Structure', 'Compliance', 'Tokenomics', 'Final Review']
-      : ['Standard Select', 'Minting Logic', 'Transfer Rules', 'Compliance Integration', 'Oracle Integration', 'Testing', 'Final Review'];
+  // Helper function to generate structured content via API
+  const generateStepContentViaAPI = async (
+    step: number,
+    phase: string,
+    history: typeof messages,
+    assetDataValue: typeof assetData
+  ) => {
+    try {
+      const response = await fetch('http://localhost:8000/api/build/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          step,
+          phase,
+          history: history.map(m => ({
+            role: m.role,
+            content: m.content,
+          })),
+          asset_data: assetDataValue,
+        }),
+      });
 
-    const stepName = steps[step];
-    const timestamp = new Date().toLocaleString();
-    const snippet = `\n\n## ${stepName}\n*${timestamp}*\n\n${aiResponse}\n---`;
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.content) {
+          // Append structured content to whitepaper/contract
+          if (phase === 'whitepaper') {
+            const currentContent = useLexstudioStore.getState().whitepaperContent;
+            updateWhitepaper(currentContent + '\n\n' + data.content);
+          } else {
+            const currentContent = useLexstudioStore.getState().contractContent;
+            updateContract(currentContent + '\n\n' + data.content);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to generate step content:', error);
+    }
+  };
 
-    if (phase === 'whitepaper') {
-      const currentContent = useLexstudioStore.getState().whitepaperContent;
-      updateWhitepaper(currentContent + snippet);
-    } else {
-      const currentContent = useLexstudioStore.getState().contractContent;
-      updateContract(currentContent + snippet);
+  // Helper function to generate project title via API
+  const generateTitleViaAPI = async (
+    history: typeof messages,
+    assetDataValue: typeof assetData
+  ) => {
+    try {
+      const response = await fetch('http://localhost:8000/api/build/title', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          history: history.map(m => ({
+            role: m.role,
+            content: m.content,
+          })),
+          asset_data: assetDataValue,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.title) {
+          // Update asset data with generated title
+          updateAssetData({ name: data.title });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to generate title:', error);
     }
   };
 
@@ -212,20 +272,18 @@ export function InputBox() {
   const extractAssetData = (input: string, step: number) => {
     const inputLower = input.toLowerCase();
 
-    // Step 0: Asset Onboarding - extract name and type
+    // Step 0: Asset Onboarding - extract type only (name will be generated by AI)
     if (step === 0) {
-      if (inputLower.includes('real estate') || inputLower.includes('房地产') || inputLower.includes('房产')) {
+      if (inputLower.includes('real estate') || inputLower.includes('房地产') || inputLower.includes('房产') || inputLower.includes('写字楼') || inputLower.includes('商业')) {
         updateAssetData({ type: 'Real Estate' });
       } else if (inputLower.includes('bond') || inputLower.includes('债券')) {
         updateAssetData({ type: 'Bond' });
       } else if (inputLower.includes('equity') || inputLower.includes('股权')) {
         updateAssetData({ type: 'Equity' });
+      } else if (inputLower.includes('art') || inputLower.includes('艺术品')) {
+        updateAssetData({ type: 'Art' });
       }
-      // Extract potential asset name (simplified)
-      const words = input.split(' ');
-      if (words.length > 0 && words[0].length > 2) {
-        updateAssetData({ name: words.slice(0, 3).join(' ') });
-      }
+      // Name will be generated by AI via generateTitleViaAPI
     }
 
     // Step 2: Yield Design - extract yield rate

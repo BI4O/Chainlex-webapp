@@ -4,7 +4,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any
 from agents.chat_agent import run_chat_agent, stream_chat_agent
-from agents.build_agent import run_build_agent, stream_build_agent
+from agents.build_agent import run_build_agent, stream_build_agent, generate_step_content, generate_project_title
 import json
 
 app = FastAPI(title="Lexstudio AI Backend")
@@ -139,6 +139,47 @@ async def build(request: BuildRequest):
             "contract_content": "",
             "history": request.history
         }
+
+
+class ContentRequest(BaseModel):
+    step: int
+    phase: str
+    history: List[Dict[str, Any]]
+    asset_data: Dict[str, Any]
+
+
+@app.post("/api/build/content")
+async def build_content(request: ContentRequest):
+    """Generate structured content for a completed step"""
+    try:
+        content = generate_step_content(
+            request.step,
+            request.phase,
+            request.history,
+            request.asset_data
+        )
+        return {"content": content, "success": True}
+    except Exception as e:
+        return {"content": "", "success": False, "error": str(e)}
+
+
+class TitleRequest(BaseModel):
+    history: List[Dict[str, Any]]
+    asset_data: Dict[str, Any]
+
+
+@app.post("/api/build/title")
+async def build_title(request: TitleRequest):
+    """Generate project title based on conversation"""
+    try:
+        title = generate_project_title(
+            request.history,
+            request.asset_data
+        )
+        return {"title": title, "success": True}
+    except Exception as e:
+        return {"title": "待命名项目", "success": False, "error": str(e)}
+
 
 if __name__ == "__main__":
     import uvicorn
