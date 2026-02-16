@@ -2,6 +2,7 @@
 
 import { Message as MessageType } from '@/lib/types';
 import { LoadingDots } from './LoadingDots';
+import ReactMarkdown from 'react-markdown';
 
 interface MessageProps {
   message: MessageType;
@@ -22,7 +23,15 @@ export function Message({ message }: MessageProps) {
           }
         `}
       >
-        {isLoading ? <LoadingDots /> : message.content}
+        {isLoading ? (
+          <LoadingDots />
+        ) : isUser ? (
+          message.content
+        ) : (
+          <div className="prose prose-sm max-w-none prose-headings:font-display prose-headings:font-bold prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-strong:font-bold">
+            <ReactMarkdown>{message.content}</ReactMarkdown>
+          </div>
+        )}
       </div>
     </div>
   );
