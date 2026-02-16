@@ -4,6 +4,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any
 from agents.chat_agent import run_chat_agent, stream_chat_agent
+from agents.build_agent import run_build_agent, stream_build_agent
 import json
 
 app = FastAPI(title="Lexstudio AI Backend")
@@ -75,22 +76,69 @@ async def chat(request: ChatRequest):
             "history": request.history
         }
 
+@app.post("/api/build/stream")
+async def build_stream(request: BuildRequest):
+    """Build Mode API - streaming task-oriented agent"""
+    async def generate():
+        try:
+            async for token in stream_build_agent(
+                request.user_input,
+                request.history,
+                request.current_step,
+                request.completed_steps,
+                request.phase,
+                request.asset_data
+            ):
+                yield f"data: {json.dumps({'token': token})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+        finally:
+            yield "data: [DONE]\n\n"
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+        }
+    )
+
 @app.post("/api/build")
 async def build(request: BuildRequest):
-    """Build Mode API - task-oriented agent"""
-    # TODO: Implement Build Agent
-    return {
-        "message": f"Build mode echo: {request.user_input}",
-        "current_step": request.current_step,
-        "completed_steps": request.completed_steps,
-        "asset_data": request.asset_data,
-        "whitepaper_content": "",
-        "contract_content": "",
-        "history": request.history + [
-            {"role": "user", "content": request.user_input},
-            {"role": "assistant", "content": f"Build mode echo: {request.user_input}"}
-        ]
-    }
+    """Build Mode API - task-oriented agent (non-streaming fallback)"""
+    try:
+        ai_response = run_build_agent(
+            request.user_input,
+            request.history,
+            request.current_step,
+            request.completed_steps,
+            request.phase,
+            request.asset_data
+        )
+
+        return {
+            "message": ai_response,
+            "current_step": request.current_step,
+            "completed_steps": request.completed_steps,
+            "asset_data": request.asset_data,
+            "whitepaper_content": "",
+            "contract_content": "",
+            "history": request.history + [
+                {"role": "user", "content": request.user_input},
+                {"role": "assistant", "content": ai_response}
+            ]
+        }
+    except Exception as e:
+        return {
+            "message": f"Error: {str(e)}",
+            "current_step": request.current_step,
+            "completed_steps": request.completed_steps,
+            "asset_data": request.asset_data,
+            "whitepaper_content": "",
+            "contract_content": "",
+            "history": request.history
+        }
 
 if __name__ == "__main__":
     import uvicorn
