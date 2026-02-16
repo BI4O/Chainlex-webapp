@@ -1,12 +1,12 @@
-'use client';
-import { useLexstudioStore } from '@/lib/store';
+import { Sidebar } from '@/components/layout/Sidebar';
 
 export default function Home() {
-  const { mode, setMode } = useLexstudioStore();
   return (
-    <div className="p-8">
-      <p>Current mode: {mode}</p>
-      <button onClick={() => setMode('build')}>Switch to Build</button>
+    <div className="flex h-screen">
+      <Sidebar />
+      <main className="flex-1 p-8">
+        <h1 className="font-display text-4xl">Welcome to Lexstudio</h1>
+      </main>
     </div>
   );
 }
