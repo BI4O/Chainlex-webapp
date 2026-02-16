@@ -26,6 +26,7 @@ export interface AssetData {
 
 export type Mode = 'chat' | 'build';
 export type Phase = 'whitepaper' | 'contract';
+export type PreviewTab = 'whitepaper' | 'contract' | 'arch-map';
 
 export interface LexstudioStore {
   // Mode
@@ -44,9 +45,11 @@ export interface LexstudioStore {
   currentStep: number;
   completedSteps: number[];
   phase: Phase;
+  previewTab: PreviewTab;
   setCurrentStep: (step: number) => void;
   addCompletedStep: (step: number) => void;
   setPhase: (phase: Phase) => void;
+  setPreviewTab: (tab: PreviewTab) => void;
 
   // Asset data
   assetData: AssetData;

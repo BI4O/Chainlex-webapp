@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-
-type TabType = 'whitepaper' | 'contract' | 'arch-map';
+import { useLexstudioStore } from '@/lib/store';
+import { PreviewTab } from '@/lib/types';
 
 export function PreviewTabs() {
-  const [activeTab, setActiveTab] = useState<TabType>('whitepaper');
+  const previewTab = useLexstudioStore((state) => state.previewTab);
+  const setPreviewTab = useLexstudioStore((state) => state.setPreviewTab);
 
-  const tabs: { id: TabType; label: string }[] = [
+  const tabs: { id: PreviewTab; label: string }[] = [
     { id: 'whitepaper', label: 'Whitepaper' },
     { id: 'contract', label: 'Contract' },
     { id: 'arch-map', label: 'Arch-Map' },
@@ -18,11 +18,11 @@ export function PreviewTabs() {
       {tabs.map((tab) => (
         <button
           key={tab.id}
-          onClick={() => setActiveTab(tab.id)}
+          onClick={() => setPreviewTab(tab.id)}
           className={`
             px-6 py-3 font-mono text-xs uppercase tracking-widest
             transition-all duration-100
-            ${activeTab === tab.id
+            ${previewTab === tab.id
               ? 'border-b-2 border-foreground -mb-0.5'
               : 'text-muted-foreground hover:text-foreground'
             }

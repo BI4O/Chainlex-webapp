@@ -90,6 +90,7 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
   currentStep: 0,
   completedSteps: [],
   phase: 'whitepaper',
+  previewTab: 'whitepaper',
   setCurrentStep: (step) => {
     set({ currentStep: step });
     get().saveToLocalStorage();
@@ -102,6 +103,10 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
   },
   setPhase: (phase) => {
     set({ phase, currentStep: 0, completedSteps: [] });
+    get().saveToLocalStorage();
+  },
+  setPreviewTab: (tab) => {
+    set({ previewTab: tab });
     get().saveToLocalStorage();
   },
 

@@ -14,6 +14,15 @@ export function InputBox() {
   const messages = useLexstudioStore((state) => state.messages);
   const addMessage = useLexstudioStore((state) => state.addMessage);
 
+  // Build Mode state
+  const currentStep = useLexstudioStore((state) => state.currentStep);
+  const completedSteps = useLexstudioStore((state) => state.completedSteps);
+  const phase = useLexstudioStore((state) => state.phase);
+  const assetData = useLexstudioStore((state) => state.assetData);
+  const updateAssetData = useLexstudioStore((state) => state.updateAssetData);
+  const updateWhitepaper = useLexstudioStore((state) => state.updateWhitepaper);
+  const updateContract = useLexstudioStore((state) => state.updateContract);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || loading || streaming) return;
@@ -40,19 +49,39 @@ export function InputBox() {
       setLoading(false);
       setStreaming(true);
 
+      // Choose API endpoint based on mode
+      const apiEndpoint = mode === 'build'
+        ? 'http://localhost:8000/api/build/stream'
+        : 'http://localhost:8000/api/chat/stream';
+
+      // Prepare request body based on mode
+      const requestBody = mode === 'build'
+        ? {
+            user_input: userInput,
+            current_step: currentStep,
+            completed_steps: completedSteps,
+            phase: phase,
+            asset_data: assetData,
+            history: messages.slice(0, -1).map(m => ({
+              role: m.role,
+              content: m.content,
+            })),
+          }
+        : {
+            user_input: userInput,
+            history: messages.slice(0, -1).map(m => ({
+              role: m.role,
+              content: m.content,
+            })),
+          };
+
       // Use EventSource for Server-Sent Events
-      const response = await fetch('http://localhost:8000/api/chat/stream', {
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          user_input: userInput,
-          history: messages.slice(0, -1).map(m => ({
-            role: m.role,
-            content: m.content,
-          })),
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
