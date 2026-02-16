@@ -5,6 +5,15 @@ export interface Message {
   timestamp: number;
 }
 
+export interface Session {
+  id: string;
+  title: string;
+  mode: Mode;
+  messages: Message[];
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface AssetData {
   name?: string;
   type?: string;
@@ -23,6 +32,14 @@ export interface LexstudioStore {
   mode: Mode;
   setMode: (mode: Mode) => void;
 
+  // Sessions
+  sessions: Session[];
+  currentSessionId: string | null;
+  createSession: () => void;
+  switchSession: (sessionId: string) => void;
+  deleteSession: (sessionId: string) => void;
+  updateSessionTitle: (sessionId: string, title: string) => void;
+
   // Build Mode state
   currentStep: number;
   completedSteps: number[];
@@ -35,7 +52,7 @@ export interface LexstudioStore {
   assetData: AssetData;
   updateAssetData: (data: Partial<AssetData>) => void;
 
-  // Messages
+  // Messages (for current session)
   messages: Message[];
   addMessage: (message: Omit<Message, 'id' | 'timestamp'>) => void;
   clearMessages: () => void;

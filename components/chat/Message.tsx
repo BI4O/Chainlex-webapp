@@ -1,6 +1,7 @@
 'use client';
 
 import { Message as MessageType } from '@/lib/types';
+import { LoadingDots } from './LoadingDots';
 
 interface MessageProps {
   message: MessageType;
@@ -8,6 +9,7 @@ interface MessageProps {
 
 export function Message({ message }: MessageProps) {
   const isUser = message.role === 'user';
+  const isLoading = message.content === '...';
 
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -20,7 +22,7 @@ export function Message({ message }: MessageProps) {
           }
         `}
       >
-        {message.content}
+        {isLoading ? <LoadingDots /> : message.content}
       </div>
     </div>
   );

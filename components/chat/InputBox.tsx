@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useLexstudioStore } from '@/lib/store';
-import { sendChatMessage } from '@/lib/api';
 
 export function InputBox() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [streaming, setStreaming] = useState(false);
+  const streamingContentRef = useRef('');
 
   const mode = useLexstudioStore((state) => state.mode);
   const setMode = useLexstudioStore((state) => state.setMode);
@@ -15,11 +16,12 @@ export function InputBox() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || loading) return;
+    if (!input.trim() || loading || streaming) return;
 
     const userInput = input.trim();
     setInput('');
     setLoading(true);
+    streamingContentRef.current = '';
 
     // Add user message
     addMessage({
@@ -27,28 +29,95 @@ export function InputBox() {
       content: userInput,
     });
 
+    // Add placeholder for AI message with loading dots
+    const placeholderId = `placeholder-${Date.now()}`;
+    addMessage({
+      role: 'assistant',
+      content: '...',
+    });
+
     try {
-      // Send to backend
-      const response = await sendChatMessage({
-        user_input: userInput,
-        history: messages.map(m => ({
-          role: m.role,
-          content: m.content,
-        })),
+      setLoading(false);
+      setStreaming(true);
+
+      // Use EventSource for Server-Sent Events
+      const response = await fetch('http://localhost:8000/api/chat/stream', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_input: userInput,
+          history: messages.slice(0, -1).map(m => ({
+            role: m.role,
+            content: m.content,
+          })),
+        }),
       });
 
-      // Add AI response
-      addMessage({
-        role: 'assistant',
-        content: response.message,
-      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (!reader) {
+        throw new Error('No reader available');
+      }
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') {
+              break;
+            }
+
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.token) {
+                streamingContentRef.current += parsed.token;
+                // Update the last message with accumulated content
+                const currentMessages = useLexstudioStore.getState().messages;
+                const lastMessage = currentMessages[currentMessages.length - 1];
+                if (lastMessage && lastMessage.role === 'assistant') {
+                  // Force update by creating new array
+                  useLexstudioStore.setState({
+                    messages: [
+                      ...currentMessages.slice(0, -1),
+                      { ...lastMessage, content: streamingContentRef.current }
+                    ]
+                  });
+                }
+              }
+            } catch (e) {
+              // Ignore parse errors for incomplete chunks
+            }
+          }
+        }
+      }
     } catch (error) {
-      addMessage({
-        role: 'assistant',
-        content: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      // Update last message with error
+      const currentMessages = useLexstudioStore.getState().messages;
+      useLexstudioStore.setState({
+        messages: [
+          ...currentMessages.slice(0, -1),
+          {
+            ...currentMessages[currentMessages.length - 1],
+            content: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+          }
+        ]
       });
     } finally {
-      setLoading(false);
+      setStreaming(false);
+      streamingContentRef.current = '';
     }
   };
 
