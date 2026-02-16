@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Source_Serif_4, JetBrains_Mono } from 'next/font/google';
+import { StoreInitializer } from '@/components/StoreInitializer';
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -33,6 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} ${sourceSerif.variable} ${jetbrainsMono.variable}`}>
       <body className="antialiased">
+        <StoreInitializer />
         {children}
       </body>
     </html>
