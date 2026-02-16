@@ -19,6 +19,8 @@ export function InputBox() {
   const completedSteps = useLexstudioStore((state) => state.completedSteps);
   const phase = useLexstudioStore((state) => state.phase);
   const assetData = useLexstudioStore((state) => state.assetData);
+  const setCurrentStep = useLexstudioStore((state) => state.setCurrentStep);
+  const addCompletedStep = useLexstudioStore((state) => state.addCompletedStep);
   const updateAssetData = useLexstudioStore((state) => state.updateAssetData);
   const updateWhitepaper = useLexstudioStore((state) => state.updateWhitepaper);
   const updateContract = useLexstudioStore((state) => state.updateContract);
@@ -146,7 +148,112 @@ export function InputBox() {
       });
     } finally {
       setStreaming(false);
+
+      // In Build Mode, check for step completion signals
+      if (mode === 'build') {
+        const responseContent = streamingContentRef.current.toLowerCase();
+
+        // Detect confirmation keywords (用户确认关键词)
+        const confirmKeywords = ['confirm', 'confirmed', 'complete', 'completed', 'done', 'yes', '好的', '确认', '完成', '是的', '可以', '没问题'];
+        const hasConfirmIntent = confirmKeywords.some(keyword =>
+          userInput.toLowerCase().includes(keyword)
+        );
+
+        // Detect step completion signals in AI response
+        const stepCompleteSignals = ['let\'s move to', 'next step', 'proceed to', 'now we can', '进入下一步', '继续下一步'];
+        const aiSuggestsNextStep = stepCompleteSignals.some(signal =>
+          responseContent.includes(signal)
+        );
+
+        // If user confirms or AI suggests next step, mark current step as complete
+        if (hasConfirmIntent || aiSuggestsNextStep) {
+          // Add current step to completed steps
+          if (!completedSteps.includes(currentStep)) {
+            addCompletedStep(currentStep);
+          }
+
+          // Move to next step if not at the last step
+          if (currentStep < 6) {
+            setCurrentStep(currentStep + 1);
+          }
+
+          // Generate content snippet based on current step
+          generateContentSnippet(currentStep, phase, streamingContentRef.current);
+        }
+
+        // Update asset data based on user input
+        extractAssetData(userInput, currentStep);
+      }
+
       streamingContentRef.current = '';
+    }
+  };
+
+  // Helper function to generate content snippet for whitepaper/contract
+  const generateContentSnippet = (step: number, phase: string, aiResponse: string) => {
+    const steps = phase === 'whitepaper'
+      ? ['Asset Onboarding', 'Valuation', 'Yield Design', 'Legal Structure', 'Compliance', 'Tokenomics', 'Final Review']
+      : ['Standard Select', 'Minting Logic', 'Transfer Rules', 'Compliance Integration', 'Oracle Integration', 'Testing', 'Final Review'];
+
+    const stepName = steps[step];
+    const timestamp = new Date().toLocaleString();
+    const snippet = `\n\n## ${stepName}\n*${timestamp}*\n\n${aiResponse}\n---`;
+
+    if (phase === 'whitepaper') {
+      const currentContent = useLexstudioStore.getState().whitepaperContent;
+      updateWhitepaper(currentContent + snippet);
+    } else {
+      const currentContent = useLexstudioStore.getState().contractContent;
+      updateContract(currentContent + snippet);
+    }
+  };
+
+  // Helper function to extract asset data from user input
+  const extractAssetData = (input: string, step: number) => {
+    const inputLower = input.toLowerCase();
+
+    // Step 0: Asset Onboarding - extract name and type
+    if (step === 0) {
+      if (inputLower.includes('real estate') || inputLower.includes('房地产') || inputLower.includes('房产')) {
+        updateAssetData({ type: 'Real Estate' });
+      } else if (inputLower.includes('bond') || inputLower.includes('债券')) {
+        updateAssetData({ type: 'Bond' });
+      } else if (inputLower.includes('equity') || inputLower.includes('股权')) {
+        updateAssetData({ type: 'Equity' });
+      }
+      // Extract potential asset name (simplified)
+      const words = input.split(' ');
+      if (words.length > 0 && words[0].length > 2) {
+        updateAssetData({ name: words.slice(0, 3).join(' ') });
+      }
+    }
+
+    // Step 2: Yield Design - extract yield rate
+    if (step === 2) {
+      const yieldMatch = input.match(/(\d+(?:\.\d+)?)\s*%/);
+      if (yieldMatch) {
+        updateAssetData({ yieldRate: parseFloat(yieldMatch[1]) });
+      }
+    }
+
+    // Step 3: Legal Structure - extract jurisdiction
+    if (step === 3) {
+      if (inputLower.includes('cayman') || inputLower.includes('开曼')) {
+        updateAssetData({ legalStructure: 'Cayman SPV' });
+      } else if (inputLower.includes('singapore') || inputLower.includes('新加坡')) {
+        updateAssetData({ legalStructure: 'Singapore VCC' });
+      } else if (inputLower.includes('delaware') || inputLower.includes('特拉华')) {
+        updateAssetData({ legalStructure: 'Delaware LLC' });
+      }
+    }
+
+    // Step 5: Tokenomics - extract total supply
+    if (step === 5) {
+      const supplyMatch = input.match(/(\d+(?:,\d+)*)\s*(?:tokens?|代币)?/i);
+      if (supplyMatch) {
+        const supply = parseInt(supplyMatch[1].replace(/,/g, ''));
+        updateAssetData({ totalSupply: supply });
+      }
     }
   };
 
