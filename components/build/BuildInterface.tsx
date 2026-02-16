@@ -1,0 +1,22 @@
+'use client';
+
+import { AIConsole } from './AIConsole';
+import { AssetWorkspace } from './AssetWorkspace';
+
+export function BuildInterface() {
+  return (
+    <div className="flex h-screen animate-fade-in">
+      {/* AI Console - 55% */}
+      <div className="w-[55%] border-r-2 border-foreground">
+        <AIConsole />
+      </div>
+
+      {/* Asset Workspace - 45% with delayed slide-in */}
+      <div className="w-[45%] overflow-hidden">
+        <div className="animate-slide-in-right-delayed h-full">
+          <AssetWorkspace />
+        </div>
+      </div>
+    </div>
+  );
+}

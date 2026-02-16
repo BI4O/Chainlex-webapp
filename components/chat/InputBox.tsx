@@ -124,7 +124,15 @@ export function InputBox() {
   const isBuildMode = mode === 'build';
 
   return (
-    <div className="fixed bottom-8 left-[280px] right-16 mx-8">
+    <div
+      className={`
+        bottom-8
+        ${isBuildMode ? 'absolute left-8 right-8' : 'fixed left-[280px] right-16 mx-8'}
+      `}
+      style={{
+        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+      }}
+    >
       <div className={`
         border-2 transition-all duration-300 ease-in-out
         ${isBuildMode
