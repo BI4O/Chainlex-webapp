@@ -19,11 +19,11 @@ export function SidebarNav() {
         <button
           key={item.id}
           className={`
-            w-full px-4 py-3 text-left font-body text-sm
-            transition-colors duration-100
+            w-full px-4 py-3 text-left font-body text-sm rounded-lg
+            transition-all duration-200
             ${item.active
-              ? 'bg-foreground text-background'
-              : 'bg-background text-foreground border-2 border-foreground hover:bg-foreground hover:text-background'
+              ? 'bg-[#324998] text-white shadow-md'
+              : 'bg-white text-black border border-[#E5E7EB] hover:bg-[#324998] hover:text-white hover:shadow-sm'
             }
           `}
         >

@@ -29,12 +29,11 @@ export function ActionBar() {
         onClick={handleExport}
         disabled={!whitepaperComplete}
         className={`
-          flex-1 px-6 py-3 font-mono text-xs uppercase tracking-widest
-          border-2 border-foreground
-          transition-all duration-100
+          flex-1 px-6 py-3 font-body text-sm font-medium
+          border-2 transition-all duration-200 rounded-lg
           ${whitepaperComplete
-            ? 'bg-foreground text-background hover:bg-background hover:text-foreground'
-            : 'bg-background text-muted-foreground cursor-not-allowed'
+            ? 'bg-[#324998] text-white border-[#324998] hover:bg-black hover:border-black shadow-sm hover:shadow-md'
+            : 'bg-white text-gray-400 border-[#E5E7EB] cursor-not-allowed'
           }
         `}
       >
@@ -45,12 +44,11 @@ export function ActionBar() {
         onClick={handleDeploy}
         disabled={!contractComplete}
         className={`
-          flex-1 px-6 py-3 font-mono text-xs uppercase tracking-widest
-          border-2 border-foreground
-          transition-all duration-100
+          flex-1 px-6 py-3 font-body text-sm font-medium
+          border-2 transition-all duration-200 rounded-lg
           ${contractComplete
-            ? 'bg-foreground text-background hover:bg-background hover:text-foreground'
-            : 'bg-background text-muted-foreground cursor-not-allowed'
+            ? 'bg-[#324998] text-white border-[#324998] hover:bg-black hover:border-black shadow-sm hover:shadow-md'
+            : 'bg-white text-gray-400 border-[#E5E7EB] cursor-not-allowed'
           }
         `}
       >

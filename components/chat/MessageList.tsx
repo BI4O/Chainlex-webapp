@@ -31,7 +31,7 @@ export function MessageList() {
   if (messages.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="font-body text-muted-foreground text-lg">
+        <p className="font-body text-gray-500 text-lg">
           Start a conversation...
         </p>
       </div>
@@ -45,13 +45,16 @@ export function MessageList() {
   return (
     <div
       ref={containerRef}
-      className={`flex-1 overflow-y-auto px-8 py-8 space-y-6 ${bottomPadding}`}
+      className={`flex-1 overflow-y-auto ${bottomPadding}`}
     >
-      {messages.map((message) => (
-        <Message key={message.id} message={message} />
-      ))}
-      {/* Invisible element to scroll to */}
-      <div ref={messagesEndRef} />
+      {/* ChatGPT-style centered container with max-width */}
+      <div className="max-w-6xl mx-auto px-8 py-8 space-y-6">
+        {messages.map((message) => (
+          <Message key={message.id} message={message} />
+        ))}
+        {/* Invisible element to scroll to */}
+        <div ref={messagesEndRef} />
+      </div>
     </div>
   );
 }

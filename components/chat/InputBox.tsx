@@ -360,20 +360,20 @@ export function InputBox() {
     >
       {/* Phase Switch Confirmation */}
       {showPhaseSwitch && isBuildMode && (
-        <div className="mb-4 border-2 border-background bg-foreground p-4">
-          <p className="text-background font-body text-sm mb-3">
+        <div className="mb-4 border-2 border-white bg-[#324998] p-4 rounded-xl shadow-lg">
+          <p className="text-white font-body text-sm mb-3">
             商业逻辑已锁定，是否开始技术建模？
           </p>
           <div className="flex gap-3">
             <button
               onClick={() => handlePhaseSwitch(true)}
-              className="px-4 py-2 bg-background text-foreground font-mono text-xs uppercase tracking-widest hover:bg-muted transition-colors"
+              className="px-4 py-2 bg-white text-[#324998] font-body text-sm font-medium hover:bg-[#f0f2f5] transition-all duration-200 rounded-lg shadow-sm hover:shadow-md"
             >
               开始合约设计
             </button>
             <button
               onClick={() => handlePhaseSwitch(false)}
-              className="px-4 py-2 border-2 border-background text-background font-mono text-xs uppercase tracking-widest hover:bg-background hover:text-foreground transition-colors"
+              className="px-4 py-2 border-2 border-white text-white font-body text-sm font-medium hover:bg-white hover:text-[#324998] transition-all duration-200 rounded-lg"
             >
               稍后
             </button>
@@ -381,20 +381,20 @@ export function InputBox() {
         </div>
       )}
       <div className={`
-        border-2 transition-all duration-300 ease-in-out
+        border transition-all duration-300 ease-in-out rounded-xl shadow-lg
         ${isBuildMode
-          ? 'bg-foreground border-background'
-          : 'bg-background border-foreground'
+          ? 'bg-[#324998] border-[#324998]'
+          : 'bg-white border-[#E5E7EB]'
         }
       `}>
         {/* Mode Toggle - Redesigned */}
         <div className={`
-          flex items-center justify-between px-6 py-3 border-b-2 transition-colors duration-300
-          ${isBuildMode ? 'border-background' : 'border-foreground'}
+          flex items-center justify-between px-6 py-3 border-b transition-colors duration-300
+          ${isBuildMode ? 'border-white/20' : 'border-[#E5E7EB]'}
         `}>
           <span className={`
-            font-mono text-xs uppercase tracking-widest transition-colors duration-300
-            ${isBuildMode ? 'text-muted' : 'text-muted-foreground'}
+            font-body text-xs font-medium uppercase tracking-wide transition-colors duration-300
+            ${isBuildMode ? 'text-gray-400' : 'text-gray-500'}
           `}>
             Mode
           </span>
@@ -402,19 +402,19 @@ export function InputBox() {
           {/* Toggle Switch */}
           <button
             onClick={() => setMode(mode === 'chat' ? 'build' : 'chat')}
-            className="relative flex items-center gap-0 font-mono text-xs uppercase tracking-widest overflow-hidden"
+            className="relative flex items-center gap-0 font-body text-xs font-semibold uppercase tracking-wide overflow-hidden"
           >
             <div className={`
-              relative w-32 h-8 border-2 transition-all duration-300
-              ${isBuildMode ? 'border-background' : 'border-foreground'}
+              relative w-32 h-8 border-2 transition-all duration-300 rounded-lg overflow-hidden
+              ${isBuildMode ? 'border-white' : 'border-[#324998]'}
             `}>
               {/* Sliding background */}
               <div
                 className={`
                   absolute top-0 h-full w-1/2 transition-all duration-300 ease-out
                   ${isBuildMode
-                    ? 'left-1/2 bg-background'
-                    : 'left-0 bg-foreground'
+                    ? 'left-1/2 bg-white'
+                    : 'left-0 bg-[#324998]'
                   }
                 `}
               />
@@ -424,8 +424,8 @@ export function InputBox() {
                 <div className={`
                   flex-1 flex items-center justify-center transition-all duration-300
                   ${!isBuildMode
-                    ? 'text-background font-bold'
-                    : 'text-background'
+                    ? 'text-white font-bold'
+                    : 'text-white'
                   }
                 `}>
                   CHAT
@@ -433,8 +433,8 @@ export function InputBox() {
                 <div className={`
                   flex-1 flex items-center justify-center transition-all duration-300
                   ${isBuildMode
-                    ? 'text-foreground font-bold'
-                    : 'text-foreground'
+                    ? 'text-[#324998] font-bold'
+                    : 'text-black'
                   }
                 `}>
                   BUILD
@@ -462,8 +462,8 @@ export function InputBox() {
               flex-1 bg-transparent font-body text-base outline-none disabled:opacity-50
               transition-colors duration-300
               ${isBuildMode
-                ? 'text-background placeholder:text-muted'
-                : 'text-foreground placeholder:text-muted-foreground'
+                ? 'text-white placeholder:text-gray-400'
+                : 'text-black placeholder:text-gray-500'
               }
             `}
           />
@@ -472,26 +472,26 @@ export function InputBox() {
             disabled={loading || isGenerating || !input.trim()}
             className={`
               w-10 h-10 flex items-center justify-center font-mono text-xl
-              border-2 transition-all duration-200
+              border-2 transition-all duration-200 rounded-lg
               ${loading || isGenerating
                 ? isBuildMode
-                  ? 'bg-background/30 text-background border-background/30 cursor-not-allowed'
-                  : 'bg-foreground/30 text-foreground border-foreground/30 cursor-not-allowed'
+                  ? 'bg-white/30 text-white border-white/30 cursor-not-allowed'
+                  : 'bg-[#324998]/30 text-[#324998] border-[#324998]/30 cursor-not-allowed'
                 : !input.trim()
                   ? isBuildMode
-                    ? 'bg-background/30 text-background border-background/30 cursor-not-allowed'
-                    : 'bg-foreground/30 text-foreground border-foreground/30 cursor-not-allowed'
+                    ? 'bg-white/30 text-white border-white/30 cursor-not-allowed'
+                    : 'bg-[#324998]/30 text-[#324998] border-[#324998]/30 cursor-not-allowed'
                   : isBuildMode
-                    ? 'bg-background text-foreground border-background hover:bg-foreground hover:text-background hover:scale-110'
-                    : 'bg-foreground text-background border-foreground hover:bg-background hover:text-foreground hover:scale-110'
+                    ? 'bg-white text-[#324998] border-white hover:bg-[#324998] hover:text-white hover:scale-110 shadow-sm hover:shadow-md'
+                    : 'bg-[#324998] text-white border-[#324998] hover:bg-black hover:border-black hover:scale-110 shadow-sm hover:shadow-md'
               }
             `}
           >
             {loading || isGenerating ? (
               <span className={`inline-block w-5 h-5 border-2 rounded-full animate-spin ${
                 isBuildMode
-                  ? 'border-background border-t-transparent'
-                  : 'border-foreground border-t-transparent'
+                  ? 'border-white border-t-transparent'
+                  : 'border-[#324998] border-t-transparent'
               }`} />
             ) : '↑'}
           </button>

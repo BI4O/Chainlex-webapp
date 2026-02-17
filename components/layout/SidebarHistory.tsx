@@ -12,24 +12,24 @@ export function SidebarHistory() {
   return (
     <div className="flex-1 overflow-y-auto flex flex-col">
       {/* New Chat Button */}
-      <div className="px-4 py-3 border-b-2 border-foreground">
+      <div className="px-4 py-3 border-b border-[#E5E7EB]">
         <button
           onClick={createSession}
-          className="w-full px-4 py-2 bg-foreground text-background font-mono text-xs uppercase tracking-widest hover:bg-background hover:text-foreground border-2 border-foreground transition-all duration-100"
+          className="w-full px-4 py-2 bg-[#324998] text-white font-body text-sm font-medium hover:bg-black border border-[#324998] hover:border-black transition-all duration-200 rounded-lg shadow-sm hover:shadow-md"
         >
           + New Chat
         </button>
       </div>
 
       {/* History Header */}
-      <h3 className="px-4 py-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+      <h3 className="px-4 py-2 font-body text-xs font-medium uppercase tracking-wide text-gray-500">
         History
       </h3>
 
       {/* Session List */}
       <div className="space-y-1 px-2">
         {sessions.length === 0 ? (
-          <p className="px-4 py-2 font-body text-sm text-muted-foreground">
+          <p className="px-4 py-2 font-body text-sm text-gray-500">
             No sessions yet
           </p>
         ) : (
@@ -38,11 +38,11 @@ export function SidebarHistory() {
               key={session.id}
               className={`
                 group relative flex items-center justify-between
-                px-4 py-2 font-body text-sm
-                transition-all duration-100
+                px-4 py-2 font-body text-sm rounded-lg
+                transition-all duration-200
                 ${currentSessionId === session.id
-                  ? 'bg-foreground text-background'
-                  : 'hover:border-b-2 hover:border-foreground cursor-pointer'
+                  ? 'bg-[#324998] text-white shadow-sm'
+                  : 'hover:bg-[#f0f2f5] cursor-pointer'
                 }
               `}
             >
@@ -60,7 +60,7 @@ export function SidebarHistory() {
                     e.stopPropagation();
                     deleteSession(session.id);
                   }}
-                  className="opacity-0 group-hover:opacity-100 ml-2 px-2 hover:text-red-600 transition-opacity duration-100"
+                  className="opacity-0 group-hover:opacity-100 ml-2 px-2 hover:text-red-600 transition-opacity duration-200"
                 >
                   ×
                 </button>

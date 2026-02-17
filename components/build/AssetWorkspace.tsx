@@ -10,19 +10,19 @@ export function AssetWorkspace() {
   const assetData = useLexstudioStore((state) => state.assetData);
 
   return (
-    <div className="flex flex-col h-full p-8">
+    <div className="flex flex-col h-full p-8 lg:p-12">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="font-display text-4xl tracking-tight mb-2">
+      <div className="mb-12 lg:mb-16">
+        <h1 className="font-body font-bold text-4xl tracking-tight mb-2">
           {assetData.name || 'New Asset'}
         </h1>
-        <p className="font-body text-lg text-muted-foreground">
+        <p className="font-body text-lg text-[#324998]">
           {assetData.type || 'Asset description will appear here'}
         </p>
       </div>
 
       {/* Milestone Tracker */}
-      <div className="mb-8">
+      <div className="mb-12 lg:mb-16">
         <MilestoneTracker />
       </div>
 

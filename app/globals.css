@@ -1,41 +1,93 @@
 @import "tailwindcss";
 
-/* Minimalist Monochrome Design System */
+/* Quiet Professional / Editorial Minimalism Design System */
 :root {
-  --background: #FFFFFF;
+  /* Canvas Background - Deeper gray for better contrast */
+  --background-canvas: #f0f2f5;
+
+  /* Card System */
+  --card-default: #FFFFFF;
+  --card-hover: #000000;
+  --card-image-default: #E1E9F6;
+  --card-image-hover: #1B1B1B;
+
+  /* Text Colors */
   --foreground: #000000;
+  --foreground-muted: #00000080;  /* 50% opacity */
+  --foreground-subtle: #000000CC;  /* 80% opacity */
+  --foreground-hover: #FFFFFF;  /* Text on inverted cards */
+  --foreground-hover-muted: #FFFFFFCC;  /* 80% opacity */
+
+  /* Accent Color - Navy Blue */
+  --accent: #324998;
+
+  /* Borders - Lighter for Apple style */
+  --border-default: #E5E7EB;
+  --border-hover: #000000;
+  --border-dashed: #D1D5DB;
+
+  /* Legacy compatibility */
+  --background: var(--background-canvas);
   --muted: #F5F5F5;
   --muted-foreground: #525252;
-  --border: #000000;
-  --border-light: #E5E5E5;
+  --border: var(--border-default);
+  --border-light: var(--border-default);
 }
 
 @theme inline {
-  --color-background: var(--background);
+  /* Background colors */
+  --color-background-canvas: var(--background-canvas);
+  --color-background: var(--background-canvas);
+
+  /* Card colors */
+  --color-card-default: var(--card-default);
+  --color-card-hover: var(--card-hover);
+
+  /* Text colors */
   --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+  --color-foreground-hover: var(--foreground-hover);
+
+  /* Accent color */
+  --color-accent: var(--accent);
+
+  /* Border colors */
+  --color-border: var(--border-default);
+  --color-border-hover: var(--border-hover);
+  --color-border-dashed: var(--border-dashed);
+
+  /* Legacy compatibility */
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --color-border: var(--border);
-  --color-border-light: var(--border-light);
+  --color-border-light: var(--border-default);
 
-  /* Font families - will be set by Next.js font variables */
-  --font-display: var(--font-display);
-  --font-body: var(--font-body);
-  --font-mono: var(--font-mono);
+  /* Font families - Apple style with Inter */
+  --font-display: var(--font-display);  /* Inter Bold for headings */
+  --font-body: var(--font-body);        /* Inter for body text */
+  --font-mono: var(--font-mono);        /* JetBrains Mono for code */
 
-  /* Remove all border radius */
-  --radius: 0px;
+  /* Apple-style border radius - 12px for cards, 8px for buttons */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+
+  /* Shadow system - inspired by Apple HIG */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
 
 * {
-  border-radius: 0 !important;
-  box-shadow: none !important;
+  /* Allow shadows for depth */
 }
 
 body {
-  background: var(--background);
+  background: var(--background-canvas);
   color: var(--foreground);
-  font-family: var(--font-body), Georgia, serif;
+  font-family: var(--font-body), -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

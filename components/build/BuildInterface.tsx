@@ -7,7 +7,7 @@ export function BuildInterface() {
   return (
     <div className="flex h-screen animate-fade-in">
       {/* AI Console - 55% */}
-      <div className="w-[55%] border-r-2 border-foreground">
+      <div className="w-[55%] border-r border-[#E5E7EB]">
         <AIConsole />
       </div>
 

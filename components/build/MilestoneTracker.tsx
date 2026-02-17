@@ -40,15 +40,17 @@ export function MilestoneTracker() {
             <button
               onClick={() => setCurrentStep(index)}
               className={`
-                w-6 h-6 flex items-center justify-center
-                border-2 border-foreground
-                transition-all duration-200
+                w-6 h-6 flex items-center justify-center rounded-full
+                border-2 transition-all duration-200
                 hover:scale-110
                 ${completedSteps.includes(index)
-                  ? 'bg-foreground text-background'
-                  : 'bg-background text-foreground'
+                  ? 'bg-[#324998] border-[#324998] text-white shadow-sm'
+                  : 'bg-white border-[#324998] text-[#324998] shadow-sm'
                 }
-                ${currentStep === index ? 'ring-2 ring-foreground ring-offset-2' : ''}
+                ${currentStep === index
+                  ? 'ring-2 ring-[#324998] ring-offset-2 ring-offset-[#f0f2f5] shadow-md'
+                  : ''
+                }
               `}
             >
               {completedSteps.includes(index) ? '●' : '○'}
@@ -56,14 +58,14 @@ export function MilestoneTracker() {
 
             {/* Connector Line */}
             {index < steps.length - 1 && (
-              <div className="w-8 h-0.5 bg-foreground mx-1" />
+              <div className="w-8 h-0.5 bg-[#E5E7EB] mx-1" />
             )}
           </div>
         ))}
       </div>
 
       {/* Current Step Label */}
-      <div className="font-mono text-xs uppercase tracking-widest text-center">
+      <div className="font-body text-sm font-medium text-center text-[#324998]">
         Step {currentStep + 1}/7: {steps[currentStep]}
       </div>
     </div>

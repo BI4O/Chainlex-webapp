@@ -16,10 +16,11 @@ export function Message({ message }: MessageProps) {
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
         className={`
-          max-w-[70%] px-6 py-4 font-body text-base
+          max-w-[85%] px-6 py-4 font-body text-base rounded-xl
+          transition-all duration-200
           ${isUser
-            ? 'bg-foreground text-background'
-            : 'bg-background text-foreground border-2 border-foreground'
+            ? 'bg-[#324998] text-white shadow-md hover:shadow-lg'
+            : 'bg-white text-black shadow-md hover:shadow-lg border border-[#E5E7EB]'
           }
         `}
       >
@@ -28,7 +29,7 @@ export function Message({ message }: MessageProps) {
         ) : isUser ? (
           message.content
         ) : (
-          <div className="prose prose-sm max-w-none prose-headings:font-display prose-headings:font-bold prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-strong:font-bold">
+          <div className="prose prose-sm max-w-none prose-headings:font-body prose-headings:font-bold prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-strong:font-bold">
             <ReactMarkdown>{message.content}</ReactMarkdown>
           </div>
         )}

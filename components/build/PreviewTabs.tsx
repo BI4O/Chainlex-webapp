@@ -14,17 +14,17 @@ export function PreviewTabs() {
   ];
 
   return (
-    <div className="flex border-b-2 border-foreground mb-4">
+    <div className="flex border-b border-[#E0E0E0] mb-4">
       {tabs.map((tab) => (
         <button
           key={tab.id}
           onClick={() => setPreviewTab(tab.id)}
           className={`
-            px-6 py-3 font-mono text-xs uppercase tracking-widest
-            transition-all duration-100
+            px-6 py-3 font-body text-sm font-medium
+            transition-all duration-200
             ${previewTab === tab.id
-              ? 'border-b-2 border-foreground -mb-0.5'
-              : 'text-muted-foreground hover:text-foreground'
+              ? 'border-b-2 border-[#324998] text-[#324998] -mb-px'
+              : 'text-gray-500 hover:text-[#324998]'
             }
           `}
         >
