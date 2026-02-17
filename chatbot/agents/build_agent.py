@@ -17,7 +17,7 @@ load_dotenv()
 
 # Initialize LLM
 llm = ChatOpenAI(
-    model="kimi-k2",
+    model=os.getenv("MODEL_NAME"),
     temperature=0.7,
     api_key=os.getenv("OPENAI_API_KEY"),
     base_url=os.getenv("OPENAI_BASE_URL"),
@@ -412,6 +412,12 @@ def get_system_prompt(phase: str, current_step: int, completed_steps: list) -> s
 You are Lexstudio Build Mode AI. Guide users through RWA asset creation.
 
 **Current**: Step {current_step + 1}/7 - {current_step_name}
+
+## CRITICAL: Language Rule
+**Always respond to the user in the SAME language they use (Chinese/English).**
+However, when generating whitepaper or contract content, use professional English for international standards.
+- Conversation: Match user's language
+- Generated documents: English
 
 ## Response Rules
 - Maximum 50 words per response

@@ -16,7 +16,7 @@ load_dotenv()
 
 # Initialize LLM with environment variables
 llm = ChatOpenAI(
-    model="kimi-k2",
+    model=os.getenv("MODEL_NAME"),
     temperature=0.7,
     api_key=os.getenv("OPENAI_API_KEY"),
     base_url=os.getenv("OPENAI_BASE_URL"),
@@ -25,6 +25,12 @@ llm = ChatOpenAI(
 # System prompt for Chat Mode
 CHAT_SYSTEM_PROMPT = """
 You are Lexstudio AI, an expert assistant for Real World Asset (RWA) tokenization.
+
+## CRITICAL: Language Rule
+**You MUST respond in the SAME language as the user's input.**
+- If user writes in Chinese (中文), respond in Chinese
+- If user writes in English, respond in English
+- Always match the user's language exactly - this is non-negotiable
 
 ## Response Style
 - Be concise and professional. Maximum 3-4 sentences per response unless detailed explanation is requested.
