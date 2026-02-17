@@ -145,6 +145,185 @@ Only include provided information.""",
 Create a comprehensive summary of the entire whitepaper."""
 }
 
+# Contract step content generation prompts
+CONTRACT_CONTENT_PROMPTS = {
+    0: """Based on the conversation, generate structured content for the Standard Selection section.
+Format your response EXACTLY as follows (use Markdown):
+
+## 合约标准选择
+
+### 选择标准
+- **采用标准**: ERC-3643 / ERC-1400
+- **选择理由**: [Why this standard is suitable for the asset]
+
+### 标准特性
+- **合规支持**: [Compliance features]
+- **转账限制**: [Transfer restrictions support]
+- **兼容性**: [Compatibility notes]
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+// Import the selected standard
+// import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+```
+
+Only include information that was actually provided. Use "待补充" for missing information.""",
+
+    1: """Generate structured Minting Logic section:
+
+## 铸造逻辑
+
+### 铸造权限
+- **铸造者**: [Who can mint tokens]
+- **铸造上限**: [Maximum mint amount if any]
+- **铸造条件**: [Conditions for minting]
+
+### 代码实现
+
+```solidity
+// Minting function
+function mint(address to, uint256 amount) external onlyMinter {
+    require(balanceOf(to) + amount <= maxBalance, "Exceeds max balance");
+    _mint(to, amount);
+}
+
+// Minting modifiers
+modifier onlyMinter() {
+    require(isMinter[msg.sender], "Not authorized to mint");
+    _;
+}
+```
+
+Only include provided information.""",
+
+    2: """Generate structured Transfer Rules section:
+
+## 转账规则
+
+### 转账限制
+- **白名单要求**: [Whitelist requirement]
+- **转账冷却**: [Transfer cooldown if any]
+- **单笔限额**: [Per-transfer limits]
+
+### 代码实现
+
+```solidity
+// Transfer function with whitelist check
+function transfer(address to, uint256 amount) public override returns (bool) {
+    require(whitelist[to], "Recipient not whitelisted");
+    require(block.timestamp >= lastTransferTime[msg.sender] + cooldownPeriod, "Transfer cooldown");
+    return super.transfer(to, amount);
+}
+
+// Whitelist management
+mapping(address => bool) public whitelist;
+
+function addToWhitelist(address account) external onlyAdmin {
+    whitelist[account] = true;
+}
+```
+
+Only include provided information.""",
+
+    3: """Generate structured Compliance Integration section:
+
+## 合规集成
+
+### Enforcer 集成
+- **KYC验证**: [KYC verification process]
+- **AML检查**: [AML check requirements]
+- **投资者资格**: [Qualified investor requirements]
+
+### 代码实现
+
+```solidity
+// Compliance interface
+interface ICompliance {
+    function canTransfer(address from, address to, uint256 amount) external view returns (bool);
+}
+
+// Compliance check in transfer
+function _beforeTokenTransfer(address from, address to, uint256 amount) internal override {
+    require(compliance.canTransfer(from, to, amount), "Compliance check failed");
+}
+
+// Compliance contract address
+ICompliance public compliance;
+```
+
+Only include provided information.""",
+
+    4: """Generate structured Oracle Integration section:
+
+## Oracle 集成
+
+### 数据源配置
+- **估值Oracle**: [Valuation oracle address]
+- **价格Oracle**: [Price feed oracle]
+- **更新频率**: [Update frequency]
+
+### 代码实现
+
+```solidity
+// Oracle interface
+interface IOracle {
+    function getAssetValue() external view returns (uint256);
+    function getLastUpdateTime() external view returns (uint256);
+}
+
+// Oracle integration
+IOracle public valuationOracle;
+
+function get NAV() public view returns (uint256) {
+    return valuationOracle.getAssetValue();
+}
+
+// Oracle update function
+function updateOracle() external {
+    // Oracle update logic
+}
+```
+
+Only include provided information.""",
+
+    5: """Generate structured Testing section:
+
+## 合约测试
+
+### 测试覆盖
+- **单元测试**: [Unit test coverage]
+- **集成测试**: [Integration tests]
+- **安全审计**: [Security audit status]
+
+### 测试代码
+
+```solidity
+// Test cases (Foundry format)
+// function testMint() public {
+//     vm.prank(minter);
+//     token.mint(user, 1000 * 10**decimals());
+//     assertEq(token.balanceOf(user), 1000 * 10**decimals());
+// }
+
+// function testTransferWhitelist() public {
+//     vm.prank(admin);
+//     token.addToWhitelist(recipient);
+//     vm.prank(user);
+//     token.transfer(recipient, 100 * 10**decimals());
+//     assertEq(token.balanceOf(recipient), 100 * 10**decimals());
+// }
+```
+
+Only include provided information.""",
+
+    6: """Generate Final Review for contract combining all completed sections.
+Create a comprehensive summary of the entire smart contract design."""
+}
+
+TITLE_GENERATION_PROMPT = """Based on the conversation, generate a concise, professional title for this RWA tokenization project.
+
 TITLE_GENERATION_PROMPT = """Based on the conversation, generate a concise, professional title for this RWA tokenization project.
 
 Rules:
@@ -164,9 +343,11 @@ def generate_step_content(
 ) -> str:
     """Generate structured content for a completed step"""
     try:
-        # Get the content prompt for this step
+        # Get the content prompt for this step based on phase
         if phase == "whitepaper" and step in STEP_CONTENT_PROMPTS:
             content_prompt = STEP_CONTENT_PROMPTS[step]
+        elif phase == "contract" and step in CONTRACT_CONTENT_PROMPTS:
+            content_prompt = CONTRACT_CONTENT_PROMPTS[step]
         else:
             return ""
 
@@ -252,6 +433,17 @@ You are Lexstudio Build Mode AI. Guide users through RWA asset creation.
             4: "收集: 投资者资格要求、KYC/AML",
             5: "收集: 代币总量、分配方案",
             6: "确认所有信息，请用户审核"
+        }
+        base_prompt += step_focus.get(current_step, "")
+    else:  # contract phase
+        step_focus = {
+            0: "收集: 合约标准选择 (ERC-3643/ERC-1400)、选择理由",
+            1: "收集: 铸造权限、铸造上限、铸造条件",
+            2: "收集: 白名单要求、转账限制、单笔限额",
+            3: "收集: KYC/AML要求、合规检查集成",
+            4: "收集: Oracle数据源、更新频率",
+            5: "确认测试计划、安全审计安排",
+            6: "确认合约设计，请用户审核"
         }
         base_prompt += step_focus.get(current_step, "")
 

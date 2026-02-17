@@ -169,6 +169,19 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
     get().saveToLocalStorage();
   },
 
+  // Sidebar state
+  sidebarCollapsed: false,
+  setSidebarCollapsed: (collapsed) => {
+    set({ sidebarCollapsed: collapsed });
+    get().saveToLocalStorage();
+  },
+
+  // AI generation state
+  isGenerating: false,
+  setIsGenerating: (generating) => {
+    set({ isGenerating: generating });
+  },
+
   // Persistence
   saveToLocalStorage: () => {
     if (typeof window === 'undefined') return;
@@ -196,9 +209,28 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
       if (!state.sessions || state.sessions.length === 0) {
         get().createSession();
       } else {
+        // Get messages for current session
+        let messages = state.sessions.find((s: Session) => s.id === state.currentSessionId)?.messages || [];
+
+        // Clean up: remove trailing "..." placeholder messages (incomplete AI responses)
+        // This happens when page is refreshed during AI generation
+        while (messages.length > 0 && messages[messages.length - 1]?.content === '...') {
+          messages = messages.slice(0, -1);
+        }
+
+        // Update the session with cleaned messages
+        const cleanedSessions = state.sessions.map((s: Session) =>
+          s.id === state.currentSessionId
+            ? { ...s, messages }
+            : s
+        );
+
         set({
           ...state,
-          messages: state.sessions.find((s: Session) => s.id === state.currentSessionId)?.messages || [],
+          sessions: cleanedSessions,
+          messages,
+          // Always reset isGenerating on page load
+          isGenerating: false,
         });
       }
     } else {

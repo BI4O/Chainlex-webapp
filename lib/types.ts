@@ -66,6 +66,14 @@ export interface LexstudioStore {
   updateWhitepaper: (content: string) => void;
   updateContract: (content: string) => void;
 
+  // Sidebar state
+  sidebarCollapsed: boolean;
+  setSidebarCollapsed: (collapsed: boolean) => void;
+
+  // AI generation state
+  isGenerating: boolean;
+  setIsGenerating: (generating: boolean) => void;
+
   // Persistence
   saveToLocalStorage: () => void;
   loadFromLocalStorage: () => void;

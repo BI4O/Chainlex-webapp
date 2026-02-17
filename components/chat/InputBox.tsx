@@ -6,7 +6,6 @@ import { useLexstudioStore } from '@/lib/store';
 export function InputBox() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [streaming, setStreaming] = useState(false);
   const streamingContentRef = useRef('');
 
   const mode = useLexstudioStore((state) => state.mode);
@@ -25,13 +24,22 @@ export function InputBox() {
   const updateWhitepaper = useLexstudioStore((state) => state.updateWhitepaper);
   const updateContract = useLexstudioStore((state) => state.updateContract);
 
+  // Sidebar state for dynamic positioning
+  const sidebarCollapsed = useLexstudioStore((state) => state.sidebarCollapsed);
+
+  // AI generation state (global)
+  const isGenerating = useLexstudioStore((state) => state.isGenerating);
+  const setIsGenerating = useLexstudioStore((state) => state.setIsGenerating);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || loading || streaming) return;
+    // Block submission when generating or no input
+    if (!input.trim() || loading || isGenerating) return;
 
     const userInput = input.trim();
     setInput('');
     setLoading(true);
+    setIsGenerating(true);
     streamingContentRef.current = '';
 
     // Add user message
@@ -41,7 +49,6 @@ export function InputBox() {
     });
 
     // Add placeholder for AI message with loading dots
-    const placeholderId = `placeholder-${Date.now()}`;
     addMessage({
       role: 'assistant',
       content: '...',
@@ -49,7 +56,6 @@ export function InputBox() {
 
     try {
       setLoading(false);
-      setStreaming(true);
 
       // Choose API endpoint based on mode
       const apiEndpoint = mode === 'build'
@@ -147,7 +153,7 @@ export function InputBox() {
         ]
       });
     } finally {
-      setStreaming(false);
+      setIsGenerating(false);
 
       // In Build Mode, check for step completion signals
       if (mode === 'build') {
@@ -315,18 +321,65 @@ export function InputBox() {
     }
   };
 
+  // Phase switch state
+  const setPhase = useLexstudioStore((state) => state.setPhase);
+  const [showPhaseSwitch, setShowPhaseSwitch] = useState(false);
+
+  // Check if whitepaper is complete (all 7 steps done)
+  const isWhitepaperComplete = phase === 'whitepaper' && completedSteps.includes(6);
+
+  // Show phase switch prompt when whitepaper is complete
+  if (isWhitepaperComplete && !showPhaseSwitch) {
+    setShowPhaseSwitch(true);
+  }
+
+  const handlePhaseSwitch = (confirm: boolean) => {
+    if (confirm) {
+      setPhase('contract');
+    }
+    setShowPhaseSwitch(false);
+  };
+
   const isBuildMode = mode === 'build';
+
+  // Calculate left position based on sidebar state
+  // Sidebar is 240px (w-60) when expanded, 32px (w-8) when collapsed
+  const sidebarWidth = sidebarCollapsed ? 32 : 240;
+  const leftPosition = isBuildMode ? 'auto' : `${sidebarWidth + 40}px`;
 
   return (
     <div
       className={`
         bottom-8
-        ${isBuildMode ? 'absolute left-8 right-8' : 'fixed left-[280px] right-16 mx-8'}
+        ${isBuildMode ? 'absolute left-8 right-8' : 'fixed right-16 mx-8'}
       `}
       style={{
+        left: isBuildMode ? undefined : leftPosition,
         transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
       }}
     >
+      {/* Phase Switch Confirmation */}
+      {showPhaseSwitch && isBuildMode && (
+        <div className="mb-4 border-2 border-background bg-foreground p-4">
+          <p className="text-background font-body text-sm mb-3">
+            商业逻辑已锁定，是否开始技术建模？
+          </p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => handlePhaseSwitch(true)}
+              className="px-4 py-2 bg-background text-foreground font-mono text-xs uppercase tracking-widest hover:bg-muted transition-colors"
+            >
+              开始合约设计
+            </button>
+            <button
+              onClick={() => handlePhaseSwitch(false)}
+              className="px-4 py-2 border-2 border-background text-background font-mono text-xs uppercase tracking-widest hover:bg-background hover:text-foreground transition-colors"
+            >
+              稍后
+            </button>
+          </div>
+        </div>
+      )}
       <div className={`
         border-2 transition-all duration-300 ease-in-out
         ${isBuildMode
@@ -364,22 +417,25 @@ export function InputBox() {
                     : 'left-0 bg-foreground'
                   }
                 `}
-                style={{
-                  transform: isBuildMode ? 'translateX(0)' : 'translateX(0)',
-                }}
               />
 
               {/* Text labels */}
               <div className="relative flex h-full">
                 <div className={`
                   flex-1 flex items-center justify-center transition-all duration-300
-                  ${!isBuildMode ? 'text-background font-bold' : 'text-foreground'}
+                  ${!isBuildMode
+                    ? 'text-background font-bold'
+                    : 'text-background'
+                  }
                 `}>
                   CHAT
                 </div>
                 <div className={`
                   flex-1 flex items-center justify-center transition-all duration-300
-                  ${isBuildMode ? 'text-foreground font-bold' : 'text-background'}
+                  ${isBuildMode
+                    ? 'text-foreground font-bold'
+                    : 'text-foreground'
+                  }
                 `}>
                   BUILD
                 </div>
@@ -394,8 +450,14 @@ export function InputBox() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={isBuildMode ? "Build your asset..." : "Type your message..."}
-            disabled={loading}
+            placeholder={
+              isGenerating
+                ? "AI 正在生成内容，请稍候..."
+                : isBuildMode
+                  ? "Build your asset..."
+                  : "Type your message..."
+            }
+            disabled={loading || isGenerating}
             className={`
               flex-1 bg-transparent font-body text-base outline-none disabled:opacity-50
               transition-colors duration-300
@@ -407,19 +469,31 @@ export function InputBox() {
           />
           <button
             type="submit"
-            disabled={loading || !input.trim()}
+            disabled={loading || isGenerating || !input.trim()}
             className={`
               w-10 h-10 flex items-center justify-center font-mono text-xl
               border-2 transition-all duration-200
-              ${loading || !input.trim()
-                ? 'opacity-25 cursor-not-allowed'
-                : isBuildMode
-                  ? 'bg-background text-foreground border-background hover:bg-foreground hover:text-background hover:scale-110'
-                  : 'bg-foreground text-background border-foreground hover:bg-background hover:text-foreground hover:scale-110'
+              ${loading || isGenerating
+                ? isBuildMode
+                  ? 'bg-background/30 text-background border-background/30 cursor-not-allowed'
+                  : 'bg-foreground/30 text-foreground border-foreground/30 cursor-not-allowed'
+                : !input.trim()
+                  ? isBuildMode
+                    ? 'bg-background/30 text-background border-background/30 cursor-not-allowed'
+                    : 'bg-foreground/30 text-foreground border-foreground/30 cursor-not-allowed'
+                  : isBuildMode
+                    ? 'bg-background text-foreground border-background hover:bg-foreground hover:text-background hover:scale-110'
+                    : 'bg-foreground text-background border-foreground hover:bg-background hover:text-foreground hover:scale-110'
               }
             `}
           >
-            {loading ? '...' : '↑'}
+            {loading || isGenerating ? (
+              <span className={`inline-block w-5 h-5 border-2 rounded-full animate-spin ${
+                isBuildMode
+                  ? 'border-background border-t-transparent'
+                  : 'border-foreground border-t-transparent'
+              }`} />
+            ) : '↑'}
           </button>
         </form>
       </div>
