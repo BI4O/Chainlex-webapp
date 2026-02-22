@@ -4,13 +4,18 @@ import { useLexstudioStore } from '@/lib/store';
 import { useState } from 'react';
 
 const WHITEPAPER_STEPS = [
-  'Asset Onboarding',
-  'Valuation',
-  'Yield Design',
-  'Legal Structure',
-  'Compliance',
+  'Executive Summary',
+  'Issuer & Governance',
+  'Token Overview & Classification',
+  'Legal & Regulatory',
   'Tokenomics',
-  'Final Review',
+  'Fundraising & Use of Proceeds',
+  'Technology & Security',
+  'Listing & Trading',
+  'Market Integrity & Disclosure',
+  'Key Risks',
+  'Incident Response & Delisting',
+  'Declarations & Signatures',
 ];
 
 const CONTRACT_STEPS = [
@@ -64,7 +69,7 @@ export function ProgressCard() {
               onMouseEnter={() => setHoveredStep(index)}
               onMouseLeave={() => setHoveredStep(null)}
               className={`
-                w-7 h-7 flex items-center justify-center rounded-full
+                w-5 h-5 flex items-center justify-center rounded-full
                 transition-all duration-200
                 hover:scale-110
                 ${completedSteps.includes(index)
@@ -77,7 +82,7 @@ export function ProgressCard() {
                 }
               `}
             >
-              <span className="text-xs font-bold">
+              <span className="text-[9px] font-bold">
                 {completedSteps.includes(index) ? '✓' : index + 1}
               </span>
             </button>
@@ -92,7 +97,7 @@ export function ProgressCard() {
 
             {/* Connector Line */}
             {index < steps.length - 1 && (
-              <div className="w-4 h-0.5 bg-gray-200 mx-0.5" />
+              <div className="w-2 h-0.5 bg-gray-200 mx-0.5" />
             )}
           </div>
         ))}

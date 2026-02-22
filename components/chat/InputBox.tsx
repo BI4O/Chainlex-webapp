@@ -191,7 +191,7 @@ export function InputBox() {
           }
 
           // Move to next step if not at the last step
-          if (currentStep < 6) {
+          if (currentStep < 11) {
             setCurrentStep(currentStep + 1);
           }
         }
@@ -326,7 +326,7 @@ export function InputBox() {
   const [showPhaseSwitch, setShowPhaseSwitch] = useState(false);
 
   // Check if whitepaper is complete (all 7 steps done)
-  const isWhitepaperComplete = phase === 'whitepaper' && completedSteps.includes(6);
+  const isWhitepaperComplete = phase === 'whitepaper' && completedSteps.includes(11);
 
   // Show phase switch prompt when whitepaper is complete
   if (isWhitepaperComplete && !showPhaseSwitch) {

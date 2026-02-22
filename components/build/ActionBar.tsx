@@ -8,8 +8,8 @@ export function ActionBar() {
   const whitepaperContent = useLexstudioStore((state) => state.whitepaperContent);
   const contractContent = useLexstudioStore((state) => state.contractContent);
 
-  const whitepaperComplete = completedSteps.length >= 7 && phase === 'whitepaper';
-  const contractComplete = completedSteps.length >= 7 && phase === 'contract';
+  const whitepaperComplete = completedSteps.length >= 12 && phase === 'whitepaper';
+  const contractComplete = completedSteps.length >= 12 && phase === 'contract';
 
   const handleExport = () => {
     if (!whitepaperContent) return;

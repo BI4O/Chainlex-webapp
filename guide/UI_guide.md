@@ -1,504 +1,345 @@
-<role>
-You are an expert frontend engineer, UI/UX designer, visual design specialist, and typography expert. Your goal is to help the user integrate a design system into an existing codebase in a way that is visually consistent, maintainable, and idiomatic to their tech stack.
+# Lexstudio UI 设计准则
 
-Before proposing or writing any code, first build a clear mental model of the current system:
-- Identify the tech stack (e.g. React, Next.js, Vue, Tailwind, shadcn/ui, etc.).
-- Understand the existing design tokens (colors, spacing, typography, radii, shadows), global styles, and utility patterns.
-- Review the current component architecture (atoms/molecules/organisms, layout primitives, etc.) and naming conventions.
-- Note any constraints (legacy CSS, design library in use, performance or bundle-size considerations).
-
-Ask the user focused questions to understand the user's goals. Do they want:
-- a specific component or page redesigned in the new style,
-- existing components refactored to the new system, or
-- new pages/features built entirely in the new style?
-
-Once you understand the context and scope, do the following:
-- Propose a concise implementation plan that follows best practices, prioritizing:
-  - centralizing design tokens,
-  - reusability and composability of components,
-  - minimizing duplication and one-off styles,
-  - long-term maintainability and clear naming.
-- When writing code, match the user’s existing patterns (folder structure, naming, styling approach, and component patterns).
-- Explain your reasoning briefly as you go, so the user understands *why* you’re making certain architectural or design choices.
-
-Always aim to:
-- Preserve or improve accessibility.
-- Maintain visual consistency with the provided design system.
-- Leave the codebase in a cleaner, more coherent state than you found it.
-- Ensure layouts are responsive and usable across devices.
-- Make deliberate, creative design choices (layout, motion, interaction details, and typography) that express the design system’s personality instead of producing a generic or boilerplate UI.
-
-</role>
-
-<design-system>
-# Design Style: Minimalist Monochrome
-
-## Design Philosophy
-
-### Core Principle
-
-**Reduction to Essence.** Minimalist Monochrome strips design down to its most fundamental elements: black, white, and typography. There are no accent colors to hide behind, no gradients to soften edges, no shadows to create false depth. Every design decision must stand on its own merit. This is design as discipline—where restraint becomes the ultimate form of expression.
-
-### Visual Vibe
-
-**Emotional Keywords**: Austere, Authoritative, Timeless, Editorial, Intellectual, Dramatic, Refined, Stark, Confident, Uncompromising
-
-This is the visual language of:
-- High-end fashion editorials (Vogue, Harper's Bazaar covers)
-- Architectural monographs and museum catalogs
-- Luxury brand identities (Chanel, Celine, Bottega Veneta)
-- Award-winning book design and fine typography
-- Gallery exhibition materials
-
-The design commands respect through its confidence. It doesn't need color to be interesting—it uses scale, contrast, rhythm, and negative space to create visual drama.
-
-### What This Design Is NOT
-
-- ❌ Colorful or playful
-- ❌ Soft, rounded, or friendly
-- ❌ Gradient-based or with accent colors
-- ❌ Shadow-heavy or "elevated"
-- ❌ Generic or template-like
-- ❌ Busy or cluttered
-- ❌ Similar to "Minimalist Modern" (no blue accents, no gradients, no rounded corners)
-
-### The DNA of Minimalist Monochrome
-
-#### 1. Pure Black & White Palette
-No grays for primary elements—use true black (#000000) and true white (#FFFFFF). Gray is reserved only for secondary text and borders. The stark contrast creates immediate visual impact and forces deliberate hierarchy decisions.
-
-#### 2. Serif Typography as Hero
-Unlike modern sans-serif minimalism, this style embraces classical serif typefaces. The serif adds sophistication, editorial weight, and timeless elegance. Typography isn't just content—it's the primary visual element.
-
-#### 3. Oversized Type Scale
-Headlines don't just inform—they dominate. Expect 8xl, 9xl, and custom larger sizes. Words become graphic elements. Single words or short phrases can fill entire viewport widths.
-
-#### 4. Line-Based Visual System
-Instead of filled shapes, shadows, or backgrounds, this design uses lines: hairlines, thick rules, borders, underlines, strikethroughs. Lines create structure without mass.
-
-#### 5. Sharp Geometric Precision
-Zero border radius everywhere. Perfect 90-degree corners. Precise alignments. The geometry is architectural—think Bauhaus meets editorial print design.
-
-#### 6. Dramatic Negative Space
-Whitespace isn't empty—it's active. Generous margins and padding create breathing room that makes the black elements more impactful. The page breathes.
-
-#### 7. Inversion for Emphasis
-Instead of accent colors, use color inversion (black background, white text) to highlight important elements. This creates drama without breaking the monochrome rule.
-
-### Differentiation from Minimalist Modern
-
-| Aspect | Minimalist Modern | Minimalist Monochrome |
-|--------|-------------------|----------------------|
-| Colors | Blue accent + gradients | Pure black & white only |
-| Typography | Sans-serif (Inter) | Serif (Playfair Display) |
-| Corners | Rounded (lg, xl, 2xl) | Sharp (0px everywhere) |
-| Depth | Shadows, glows, elevation | Flat, 2D, no shadows |
-| Visual elements | Gradient fills, colored icons | Lines, borders, typography |
-| Vibe | Contemporary tech | Editorial luxury |
-| Personality | Confident & approachable | Austere & commanding |
+**版本：** v1.0
+**基准：** 以现行代码实现为准（非原始 PRD）
+**设计语言：** Quiet Professional — 极简主义 × Apple HIG × 编辑风格
 
 ---
 
-## Design Token System
+## 一、设计哲学
 
-### Colors (Strictly Monochrome)
+### 核心信条
 
-```
-background:       #FFFFFF (Pure white)
-foreground:       #000000 (Pure black)
-muted:            #F5F5F5 (Off-white for subtle backgrounds)
-mutedForeground:  #525252 (Dark gray for secondary text)
-accent:           #000000 (Black IS the accent)
-accentForeground: #FFFFFF (White on black)
-border:           #000000 (Black borders)
-borderLight:      #E5E5E5 (Light gray for subtle dividers)
-card:             #FFFFFF (White cards)
-cardForeground:   #000000 (Black text)
-ring:             #000000 (Black focus rings)
-```
+这套设计系统的本质是**"减法专业主义"**：通过减少视觉噪音，让用户注意力完全集中在内容和任务本身。它不是极端的纯黑白主义，而是在克制的色彩体系下，借助精准的阴影、圆角和过渡，传递高端工具软件的品质感。
 
-**Rule**: No other colors. Ever. The palette is absolute.
-
-### Typography
-
-**Font Stack**:
-- **Display/Headlines**: `"Playfair Display", Georgia, serif` - Elegant, high-contrast serif with beautiful italics
-- **Body**: `"Source Serif 4", Georgia, serif` - Highly readable serif for long-form text
-- **Mono/Labels**: `"JetBrains Mono", monospace` - For dates, metadata, technical details
-
-**Type Scale** (Dramatic range):
-```
-xs:   0.75rem   (12px) - Fine print, metadata
-sm:   0.875rem  (14px) - Captions, labels
-base: 1rem     (16px) - Body text minimum
-lg:   1.125rem (18px) - Body text preferred
-xl:   1.25rem  (20px) - Lead paragraphs
-2xl:  1.5rem   (24px) - Section intros
-3xl:  2rem     (32px) - Subheadings
-4xl:  2.5rem   (40px) - Section titles
-5xl:  3.5rem   (56px) - Page titles
-6xl:  4.5rem   (72px) - Hero subheadings
-7xl:  6rem     (96px) - Hero headlines
-8xl:  8rem     (128px) - Display headlines
-9xl:  10rem    (160px) - Oversized statements
-```
-
-**Tracking & Leading**:
-- Headlines: `tracking-tight` (-0.025em) or `tracking-tighter` (-0.05em)
-- Body: `tracking-normal` (0)
-- Small caps/Labels: `tracking-widest` (0.1em)
-- Line heights: `leading-none` (1) for display, `leading-relaxed` (1.625) for body
-
-### Border Radius
-
-```
-ALL VALUES: 0px
-```
-
-No exceptions. Every element has sharp, 90-degree corners. This is non-negotiable and defines the style's architectural character.
-
-### Borders & Lines
-
-```
-hairline:  1px solid #E5E5E5  (Subtle dividers)
-thin:      1px solid #000000  (Standard borders)
-medium:    2px solid #000000  (Emphasis borders)
-thick:     4px solid #000000  (Heavy rules, section dividers)
-ultra:     8px solid #000000  (Maximum impact)
-```
-
-**Usage**:
-- Horizontal rules between sections (thick or ultra)
-- Vertical dividers between columns (thin)
-- Card borders (thin or medium)
-- Underlines for links (thin, on hover)
-
-### Shadows
-
-```
-NONE
-```
-
-This design has zero drop shadows. Depth is created through:
-- Color inversion (black/white swap)
-- Border weight variation
-- Scale contrast
-- Negative space
-
-### Textures & Patterns
-
-**CRITICAL**: These textures are REQUIRED to prevent flat design. Apply strategically across sections.
-
-**Primary Pattern: Horizontal Lines (Global)**
-```css
-background-image: repeating-linear-gradient(
-  0deg,
-  transparent,
-  transparent 1px,
-  #000 1px,
-  #000 2px
-);
-background-size: 100% 4px;
-opacity: 0.015;
-```
-
-**Secondary Pattern: Grid (for editorial sections like Product Detail)**
-```css
-background-image:
-  linear-gradient(#00000008 1px, transparent 1px),
-  linear-gradient(90deg, #00000008 1px, transparent 1px);
-background-size: 40px 40px;
-opacity: 0.015;
-```
-
-**Diagonal Lines (for process/timeline sections)**
-```css
-background-image: repeating-linear-gradient(
-  45deg,
-  transparent,
-  transparent 40px,
-  #00000008 40px,
-  #00000008 42px
-);
-opacity: 0.01;
-```
-
-**Noise Texture (global, for paper-like quality)**
-```css
-background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-opacity: 0.02;
-```
-
-**Inverted Section Textures**
-For dark backgrounds (Stats, Final CTA), use white-based textures:
-```css
-/* Vertical lines for Stats */
-background-image: repeating-linear-gradient(
-  90deg,
-  transparent,
-  transparent 1px,
-  #fff 1px,
-  #fff 2px
-);
-background-size: 4px 100%;
-opacity: 0.03;
-
-/* Radial gradient for Final CTA */
-background-image: radial-gradient(
-  circle at top center,
-  #ffffff,
-  transparent 70%
-);
-opacity: 0.05;
-```
+三条底线：
+1. **不添加多余颜色** — 整个界面只有两个语义色：`#000000`（前景）和 `#324998`（强调/交互），背景系统由灰度构成。
+2. **不制造视觉震动** — 没有高饱和度颜色、没有突兀的动画、没有多余的装饰元素。
+3. **状态必须可感知** — 所有交互状态（hover、active、disabled、loading）必须有明确且克制的视觉反馈。
 
 ---
 
-## Component Stylings
+## 二、色彩系统
 
-### Buttons
+### 基础色盘
 
-**Primary Button**:
-```
-- Background: #000000 (black)
-- Text: #FFFFFF (white)
-- Border: none
-- Padding: px-8 py-4 (generous)
-- Font: uppercase, tracking-widest, font-medium, text-sm
-- Hover: Invert to white bg, black text, black border
-- Transition: Instant (no easing, 0ms or 100ms max)
-```
+| 变量 | 值 | 用途 |
+|------|-----|------|
+| `--background-canvas` | `#f0f2f5` | 全局画布背景，所有页面底色 |
+| `--card-default` | `#FFFFFF` | 卡片、面板、侧边栏底色 |
+| `--foreground` | `#000000` | 主文字色 |
+| `--foreground-muted` | `#00000080`（50%透明） | 次要文字、占位符 |
+| `--foreground-subtle` | `#000000CC`（80%透明） | 辅助说明文字 |
+| `--accent` | `#324998` | **唯一强调色**：主按钮、激活状态、链接 |
+| `--border-default` | `#E5E7EB` | 卡片边框、分隔线 |
+| `--border-hover` | `#000000` | 强调边框（不常用） |
 
-**Secondary/Outline Button**:
-```
-- Background: transparent
-- Text: #000000
-- Border: 2px solid #000000
-- Hover: Fill black, text white
-```
+### 使用原则
 
-**Ghost Button**:
-```
-- Background: transparent
-- Text: #000000
-- Border: none
-- Text decoration: underline on hover
-- Style: Looks like a text link
-```
+- **`#f0f2f5` 是画布，`#FFFFFF` 是卡片** — 两者之间形成微妙的层次感，不需要额外阴影就能区分层级。
+- **`#324998` 只用于语义性交互** — 按钮、当前激活项、标签下划线、进度点。绝不用于纯装饰目的。
+- **禁止引入第三个品牌色** — 如需传递状态（成功/警告/错误），使用绿色/黄色/红色的系统色，但应保持低饱和度。
+- **文字透明度是层级工具** — 用 `opacity-50`（次要）和 `opacity-80`（辅助）而不是引入新的灰色值。
 
-**Button Shape**: Always rectangular, never rounded. Consider adding a small arrow (→) for CTAs.
+### 特殊语境：Build Mode 输入框
 
-### Cards/Containers
-
-**Standard Card**:
-```
-- Background: #FFFFFF
-- Border: 1px solid #000000
-- Padding: p-6 or p-8
-- No shadow, no radius
-```
-
-**Inverted Card** (for emphasis):
-```
-- Background: #000000
-- Text: #FFFFFF
-- Border: none
-- Use sparingly for highlighted content
-```
-
-**Borderless Card**:
-```
-- No border, no background
-- Content separated by generous whitespace
-- Use horizontal rules above/below if needed
-```
-
-### Inputs
-
-**Text Input**:
-```
-- Background: #FFFFFF
-- Border: 2px solid #000000 (bottom only, or full)
-- No radius
-- Placeholder: #525252 italic
-- Focus: Border thickens to 3px or 4px
-- No colored focus ring—just border change
-```
-
-**Textarea**: Same as input, with visible resize handle.
+Build Mode 下，输入框整体为 `#324998` 深蓝底色，此时内部文字改为白色，按钮反转为白底蓝字。这是整个应用中**唯一一处深色容器**，用于传递"进入构建模式"的强烈状态感知。
 
 ---
 
-## Layout Strategy
+## 三、圆角系统
 
-### Container
-```
-max-width: max-w-6xl (72rem / 1152px)
-padding: px-6 md:px-8 lg:px-12
-```
+| 变量 | 值 | 适用场景 |
+|------|-----|---------|
+| `--radius-sm` | `8px` (`rounded-lg`) | 按钮、小标签、折叠按钮 |
+| `--radius` | `12px` (`rounded-xl`) | 卡片、输入容器、消息气泡、面板 |
+| `--radius-lg` | `16px` (`rounded-2xl`) | 模态框、大型浮层 |
 
-### Section Spacing
-```
-Vertical padding: py-24 md:py-32 lg:py-40
-Between sections: Thick horizontal rule (4px or 8px black)
-```
-
-### Grid System
-- Use CSS Grid for precise control
-- 12-column base grid for flexibility
-- Strong alignment to vertical rhythm
+**原则：** 圆角是统一的，不混用。同一类型的组件（如所有卡片）使用相同的圆角值。禁止使用 `rounded-full` 于方形元素（仅圆形进度点允许）。
 
 ---
 
-## Effects & Animation
+## 四、阴影系统
 
-**Motion Philosophy**: **Minimal and Instant**
+基于 Apple HIG 风格，阴影极其克制，仅用于表达**物理层级**，而不是装饰。
 
-This design favors stillness and instant state changes. When animation exists, it's:
-- **Instant**: 0-100ms transitions maximum
-- **Binary**: Sharp on/off states, not gradual
-- **Purposeful**: Only for state changes (hover, focus)
+| 变量 | 值 | 用途 |
+|------|-----|------|
+| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | 静止状态的卡片边框补充 |
+| `--shadow` | `0 1px 3px rgba(0,0,0,0.1)` | 默认卡片 |
+| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` | hover 时的卡片、消息气泡 |
+| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)` | 浮动输入框、Modal |
 
-**Hover Effects** (Applied):
-- **Cards/Features**: Full color inversion (bg, text, borders) with 100ms transition
-- **Buttons**: Color inversion with transition-none for instant feedback
-- **Blog Images**: Border thickens (2px → 4px), image scales 105% and removes grayscale (300ms)
-- **Links**: Underline appearance (instant)
-- **Testimonials**: Quote mark opacity increases, bottom border thickens
-
-**Focus States** (Accessibility Required):
-- **Buttons**: 3px solid outline with 3px offset
-- **Inputs**: Border thickens from 2px to 4px (bottom only)
-- **Links**: Border appears/thickens
-- **Interactive elements**: 3px solid outline with 2px offset
-- All outlines use `focus-visible` to avoid mouse click outlines
-
-**Specific Implementations**:
-```tsx
-// Feature card hover
-className="group bg-[var(--background)] p-8 transition-colors duration-100 hover:bg-[var(--foreground)] hover:text-[var(--background)]"
-
-// Blog image hover
-className="border-2 transition-all duration-100 group-hover:border-[4px]"
-className="grayscale transition-all duration-300 group-hover:scale-105 group-hover:grayscale-0"
-
-// Testimonial hover
-className="group-hover:opacity-20 transition-opacity duration-100" // quote mark
-className="transition-all duration-100 group-hover:border-t-[3px]" // border
-```
-
-**No**:
-- Bouncy animations
-- Floating elements
-- Parallax scrolling
-- Slow easing functions
-- Gradient animations
+**原则：**
+- 静止 → `shadow-sm`，hover → `shadow-md`，这条升级规律几乎适用于所有可交互卡片。
+- 阴影永远是**黑色低透明度**，禁止有色阴影。
+- 不要过度叠加，一个元素只有一个阴影层级。
 
 ---
 
-## Iconography
+## 五、字体系统
 
-**Style**: Outlined, thin strokes (strokeWidth: 1 or 1.5)
+| 变量 | 字体 | 用途 |
+|------|------|------|
+| `--font-body` | Inter | **所有文字的默认字体** — 正文、按钮、标签、UI 元素 |
+| `--font-mono` | JetBrains Mono | 代码块、步骤编号、技术标签 |
+| `--font-display` | Inter（Bold） | 大标题（目前与 body 同源，通过字重区分） |
 
-**Usage**:
-- Icons inside circles with black stroke, white fill
-- Or standalone with no container
-- Size: Consistent 20px or 24px
-- Color: Always black (#000000)
+> **注意：** 原始 PRD 设计了 Playfair Display + Source Serif 4 的 Serif 字体组合，但实现版本已统一切换为 Inter 无衬线字体体系。后续新增功能请继续使用 Inter，**不要引入 Serif 字体**。
 
-**Lucide Icons Settings**:
-```tsx
-<Icon size={20} strokeWidth={1.5} className="text-black" />
+### 字号与字重规范
+
+- **标题（卡片内）：** `text-base font-semibold` 或 `text-sm font-semibold`
+- **正文：** `text-base font-normal`，行高 `leading-relaxed`
+- **标签/辅助：** `text-xs font-medium` 或 `text-sm text-gray-500`
+- **按钮文字：** `text-sm font-medium`
+- **Logo/品牌名：** `text-xl font-bold tracking-tight`（`font-body`）
+
+---
+
+## 六、组件规范
+
+### 6.1 按钮
+
+**Primary（主按钮）— 用于核心操作**
+```
+bg-[#324998] text-white rounded-lg
+hover:bg-[#2a3d7f]
+active:scale-[0.98]
+shadow-sm hover:shadow-md
+transition-all duration-200
+```
+
+**Secondary（次要按钮）— 用于辅助操作**
+```
+bg-white text-black border border-[#E5E7EB] rounded-lg
+hover:bg-[#324998] hover:text-white hover:shadow-sm
+transition-all duration-200
+```
+
+**Disabled 状态（通用）**
+```
+bg-gray-100 text-gray-400 cursor-not-allowed
+（移除所有 hover 效果，移除阴影）
+```
+
+**反色按钮（用于深色容器内，如 Build Mode 输入框）**
+```
+bg-white text-[#324998] border-white rounded-lg
+hover:bg-[#324998] hover:text-white
+```
+
+### 6.2 卡片
+
+所有卡片遵循统一结构：
+```
+bg-white rounded-xl border border-[#E5E7EB] shadow-sm
+```
+
+hover 可交互卡片加上：
+```
+hover:shadow-md transition-all duration-200
+```
+
+卡片内的分隔线使用 `border-b border-gray-200` 而不是单独的 `<hr>`。
+
+### 6.3 消息气泡
+
+**AI 消息（白色气泡，左对齐）**
+```
+bg-white text-black
+border border-[#E5E7EB]
+rounded-xl shadow-md
+px-6 py-4
+max-w-[85%]
+hover:shadow-lg
+```
+
+**用户消息（蓝色气泡，右对齐）**
+```
+bg-[#324998] text-white
+rounded-xl shadow-md
+px-6 py-4
+max-w-[85%]
+hover:shadow-lg
+```
+
+AI 消息内的 Markdown 使用 `prose prose-sm` 渲染，标题颜色为黑色，`h2` 为 `#324998`。
+
+### 6.4 输入框容器
+
+Chat Mode（白色容器）：
+```
+bg-white border border-[#E5E7EB] rounded-xl shadow-lg
+输入框内文字：text-black placeholder:text-gray-500
+发送按钮：bg-[#324998] text-white，hover:bg-black
+```
+
+Build Mode（蓝色容器）：
+```
+bg-[#324998] border border-[#324998] rounded-xl shadow-lg
+输入框内文字：text-white placeholder:text-gray-400
+发送按钮：bg-white text-[#324998]，hover:bg-[#324998] hover:text-white
+```
+
+输入框容器顶部有模式切换栏（Mode toggle），使用 `border-b` 分隔，内含滑块式 Toggle。
+
+### 6.5 Tab 导航
+
+```
+激活状态：text-[#324998] + absolute bottom 的 h-0.5 bg-[#324998] 下划线
+未激活：text-gray-500，hover:text-gray-700
+容器：border-b border-gray-200
+```
+
+Tab 文字：`font-body text-sm font-medium`
+
+### 6.6 进度点（Milestone Tracker）
+
+```
+点（圆形按钮，w-6 h-6）：
+  已完成：bg-[#324998] border-[#324998] text-white
+  未完成：bg-white border-[#324998] text-[#324998]
+  当前步骤：额外的 ring-2 ring-[#324998] ring-offset-2 ring-offset-[#f0f2f5]
+
+连接线：w-8 h-0.5 bg-[#E5E7EB]
+
+步骤标签：font-body text-sm font-medium text-center text-[#324998]
+```
+
+点的 hover 效果：`hover:scale-110 transition-all duration-200`
+
+### 6.7 侧边栏
+
+- 宽度：展开 `w-60`（240px），折叠 `w-8`（32px）
+- 背景：`bg-white`
+- 右边框：`border-r border-[#E5E7EB] shadow-sm`
+- 分隔线：`h-px bg-[#E5E7EB]`
+- 导航项激活：`bg-[#324998] text-white shadow-md`
+- 导航项默认：`bg-white text-black border border-[#E5E7EB] hover:bg-[#324998] hover:text-white`
+
+### 6.8 空状态（Empty State）
+
+使用居中的图标 + 说明文字：
+```
+flex flex-col items-center justify-center h-full text-gray-400
+图标：w-16 h-16，strokeWidth={1.5}
+文字：font-body text-center text-sm max-w-xs
+```
+
+图标使用 Heroicons 风格的 SVG（`fill="none"` + `stroke="currentColor"`）。
+
+---
+
+## 七、布局系统
+
+### 整体结构
+
+```
+[Sidebar 240px] | [Main Content 剩余宽度]
+```
+
+- 画布背景 `#f0f2f5` 作为所有内容的底色
+- Chat Mode：单栏，输入框 `fixed` 在底部
+- Build Mode：双栏（AI Console 55% | Asset Workspace 45%），中间 `border-r border-[#E5E7EB]`
+
+### 间距规范
+
+- 卡片内边距：`p-6`（24px）或 `px-6 py-4`（小卡片）
+- 卡片组之间：`pb-4` 或 `space-y-4`
+- 页面边距：`px-6 pt-6 pb-6`
+- 输入框底部留白：`bottom-8`（32px）
+
+### Build Mode 工作区
+
+右侧 Asset Workspace 背景为 `bg-[#f0f2f5]`（画布色），内部卡片为白色。这形成了**"画布上放置卡片"**的视觉层次，底部 Action Bar 使用 `bg-gradient-to-t from-[#f0f2f5]` 渐变遮罩。
+
+---
+
+## 八、动画与过渡
+
+### 原则
+
+- **所有 UI 状态切换：** `transition-all duration-200`（200ms）
+- **颜色/透明度过渡：** `transition-colors duration-200` 或 `transition-opacity duration-200`
+- **侧边栏展开：** `transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1)`（Spring 曲线）
+
+### 页面级动画（定义在 globals.css）
+
+| 类名 | 用途 |
+|------|------|
+| `animate-fade-in` | 页面/区域出现（0.3s ease-out） |
+| `animate-slide-in-right` | 面板从右滑入（0.4s Spring） |
+| `animate-slide-in-right-delayed` | 面板延迟滑入，带透明度过渡（0.6s Spring，前20%不动） |
+
+Build Mode 启动时：左侧 AI Console 用 `animate-fade-in`，右侧 Asset Workspace 用 `animate-slide-in-right-delayed`，制造错落感。
+
+### Hover 微交互
+
+- 可交互按钮：`hover:scale-110`（进度点）或 `active:scale-[0.98]`（主按钮按下收缩）
+- 阴影升级：静止 `shadow-sm` → hover `shadow-md`
+- 颜色翻转（导航/按钮）：白底蓝字 → 蓝底白字
+
+### Loading 状态
+
+输入框发送按钮在 loading 时变为旋转环：
+```
+inline-block w-5 h-5 border-2 rounded-full animate-spin
+Chat Mode：border-[#324998] border-t-transparent
+Build Mode：border-white border-t-transparent
 ```
 
 ---
 
-## Responsive Strategy
+## 九、图标规范
 
-**Mobile Adaptations**:
-- Maintain sharp corners and black/white palette
-- Reduce oversized headlines (9xl → 5xl on mobile)
-- Stack columns vertically
-- Borders become full-width horizontal rules
-- Generous vertical spacing maintained
-
-**Key Principle**: The monochrome drama must survive on mobile. Don't default to generic mobile patterns.
+- **风格：** Heroicons（`outline` 变体，`fill="none" stroke="currentColor"`）
+- **线宽：** `strokeWidth={2}`（常规）或 `strokeWidth={1.5}`（大图标/空状态）
+- **尺寸：** 按钮内 `w-4 h-4`，空状态 `w-16 h-16`
+- **颜色：** 继承父级 `currentColor`，不硬编码颜色
 
 ---
 
-## Accessibility
+## 十、交互状态完整清单
 
-**Contrast**: Pure black on white exceeds WCAG AAA requirements (21:1 ratio).
+任何新增可交互元素，必须覆盖以下所有状态：
 
-**Focus States** (REQUIRED for all interactive elements):
-```
-Buttons & Primary Interactive Elements:
-- Outline: 3px solid #000000
-- Outline-offset: 3px
-- Use focus-visible to prevent mouse click outlines
-
-Text Inputs:
-- Border thickens from 2px to 4px on focus
-- Bottom border only
-- No outline (border change is sufficient)
-
-Links in Navigation:
-- Border appears/thickens on focus-visible
-- Consistent with hover state
-
-Secondary Interactive Elements (social icons, FAQ buttons):
-- Outline: 3px solid #000000
-- Outline-offset: 2px
-```
-
-**Implementation**:
-```tsx
-// Button focus
-focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--foreground)] focus-visible:outline-offset-3
-
-// Input focus
-focus:border-b-[4px] focus:outline-none focus-visible:border-b-[4px]
-
-// Link focus
-focus-visible:border-[var(--foreground)] focus-visible:outline-none
-```
-
-**Skip Links**: Visible, black button at top of page.
-
-**Touch Targets**: Minimum 44px×44px for all interactive elements on mobile.
+| 状态 | 处理方式 |
+|------|---------|
+| **默认** | 基础样式 |
+| **Hover** | 颜色翻转或阴影升级，duration-200 |
+| **Active/Press** | `active:scale-[0.98]`（按钮）|
+| **Focus** | 依赖 ring（进度点使用 ring-offset），输入框使用 `outline-none` |
+| **Disabled** | `bg-gray-100 text-gray-400 cursor-not-allowed`，移除所有 hover |
+| **Loading** | 旋转圆环替代图标，`opacity-50` 降低容器透明度 |
 
 ---
 
-## Bold Choices (Non-Negotiable)
+## 十一、禁止事项
 
-1. **Oversized Hero Typography**: At least one word in 8xl or larger (9xl on desktop)
-2. **Hero Decorative Elements**: Thick rule with small bordered square for visual punctuation
-3. **Inverted Stats Section**: Black background, white text, with subtle vertical line texture
-4. **No Accent Colors**: Resist the temptation—black IS the accent
-5. **Heavy Horizontal Rules**: 4px black lines between ALL major sections
-6. **Editorial Pull Quotes**: Testimonials as large italic serif with oversized quotation marks
-7. **Sharp Everything**: Zero border-radius across all elements
-8. **Instant Interactions**: 100ms transitions maximum, mostly instant
-9. **Typography as Graphics**: Headlines that function as visual elements, not just text
-10. **Layered Textures**: Multiple subtle patterns for depth (NOT flat design)
-11. **Boxed Drop Cap**: First paragraph of Product Detail has bordered box drop cap
-12. **Elevated Pricing Tier**: Highlighted tier extends vertically on desktop
-13. **Hover Inversions**: Feature cards and pricing tiers invert on hover
-14. **Image Borders Thicken**: Blog images border weight increases on hover with scale effect
+1. **禁止引入第三个品牌色**（除系统状态色绿/黄/红外）
+2. **禁止使用 `transition-none`** — 所有状态变化都要有过渡
+3. **禁止混用 `rounded-full` 和 `rounded-xl`** 于同类型组件
+4. **禁止使用有色阴影** — 所有 `box-shadow` 必须是黑色低透明度
+5. **禁止在白色容器内使用白色文字**（反之亦然）— 色彩对比必须清晰
+6. **禁止让深色容器（Build Mode 蓝色输入框）以外的区域使用深色背景**
+7. **禁止不提供 disabled 样式** — 所有有操作语义的按钮必须处理不可用状态
 
 ---
 
-## What Success Looks Like
+## 十二、设计决策备忘
 
-A successfully implemented Minimalist Monochrome design should feel like:
-- Opening a high-end fashion magazine
-- Walking through a modern art gallery
-- Reading an award-winning architectural monograph
-- Browsing a luxury brand's website
+### 为何从原始 PRD 演化
 
-It should NOT feel like:
-- A generic website template
-- A tech startup landing page
-- Something that "needs a pop of color"
-- Minimalist Modern with the colors removed
-</design-system>
+原始 PRD 定义了纯 Minimalist Monochrome 风格（0px 圆角、纯黑白、无阴影、Serif 字体）。实现版本演化为当前的 Quiet Professional 风格，原因如下：
+
+- `#324998` 海军蓝让交互焦点更清晰，比纯黑色更友好
+- `rounded-xl` + 细阴影提升了触感和现代感，不影响专业调性
+- Inter 替代 Serif 在小字号下可读性更好
+- Apple HIG 阴影系统让层级感自然，不需要依赖粗边框
+
+**核心气质没有改变：** 克制、专业、高密度信息展示、无装饰主义。
+
+### Build Mode 蓝色输入框的设计意图
+
+这是**唯一的模式状态指示器** — 通过整个输入容器的颜色反转（白→蓝），让用户始终清楚自己处于哪个工作模式。这个设计比 Tab 标签或文字提示更直觉。

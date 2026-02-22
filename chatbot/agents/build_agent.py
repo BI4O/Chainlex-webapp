@@ -25,13 +25,18 @@ llm = ChatOpenAI(
 
 # Whitepaper steps
 WHITEPAPER_STEPS = {
-    0: "Asset Onboarding - Define underlying asset information",
-    1: "Valuation - Connect Oracle for valuation data",
-    2: "Yield Design - Set yield rate and distribution frequency",
-    3: "Legal Structure - Choose SPV structure and jurisdiction",
-    4: "Compliance - Enforcer intervention for qualified investor restrictions",
-    5: "Tokenomics - Define token supply and distribution logic",
-    6: "Final Review - Review and confirm the complete whitepaper",
+    0: "Executive Summary - Token symbol, contract address, basic project info",
+    1: "Issuer & Governance - Corporate structure, core team responsibilities",
+    2: "Token Overview & Classification - Token utility, legal classification",
+    3: "Legal & Regulatory - Offering routes, KYC/AML compliance",
+    4: "Tokenomics - Supply, allocation, unlock schedule, treasury",
+    5: "Fundraising & Use of Proceeds - Past rounds, current funding usage",
+    6: "Technology & Security - Blockchain & contract info, security audits",
+    7: "Listing & Trading - Exchange platforms, trading pairs setup",
+    8: "Market Integrity & Disclosure - Insider policy, disclosure requirements",
+    9: "Key Risks - Legal, technical, market risk assessment",
+    10: "Incident Response & Delisting - Emergency procedures, delisting triggers",
+    11: "Declarations & Signatures - Authenticity statements, risk disclosures",
 }
 
 # Contract steps
@@ -47,102 +52,229 @@ CONTRACT_STEPS = {
 
 # Step-specific content generation prompts
 STEP_CONTENT_PROMPTS = {
-    0: """Based on the conversation, generate a structured summary for the Asset Onboarding section.
+    0: """Based on the conversation, generate structured content for the Executive Summary section.
 Format your response EXACTLY as follows (use Markdown):
 
-## 资产概述
+## Executive Summary
 
-### 基本信息
-- **项目名称**: [Generate a professional project name, e.g., "银河大厦RWA代币化项目"]
-- **资产类型**: [Asset type]
-- **地理位置**: [Location if mentioned]
-- **资产描述**: [Brief description]
+- **Project Name**: [Project name]
+- **Token Symbol**: [Symbol, e.g. RWA-XXX]
+- **Contract Address**: [If provided, else "TBD"]
+- **Blockchain**: [Network, e.g. Ethereum / Polygon]
+- **Token Standard**: [ERC-20 / ERC-3643 / etc.]
+- **Offering Type**: [Security Token / Utility Token / etc.]
+- **Brief Description**: [1-2 sentence project description]
 
-### 资产特征
-- **规模**: [Size/scale if mentioned]
-- **状态**: [Current status if mentioned]
-- **其他**: [Other relevant info]
+Only include information that was actually provided. Use "TBD" for missing fields.""",
 
-Only include information that was actually provided. Use "待补充" for missing information.""",
-
-    1: """Based on the conversation, generate a structured summary for the Valuation section.
+    1: """Based on the conversation, generate structured content for the Issuer & Governance section.
 Format your response EXACTLY as follows:
 
-## 估值方案
+## Issuer & Governance
 
-### 估值方法
-- **采用方法**: [Valuation method discussed]
-- **数据来源**: [Oracle/data source]
+### Issuer Information
+- **Legal Entity Name**: [Entity name]
+- **Registration Jurisdiction**: [Country/Region]
+- **Registration Number**: [If provided]
+- **Registered Address**: [If provided]
 
-### 估值结果
-- **估值金额**: [Valuation amount]
-- **评估机构**: [Valuation provider if mentioned]
-- **评估日期**: [Date if mentioned]
+### Core Team & Responsibilities
+[List key team members and their roles if mentioned]
 
-### 估值依据
-[Brief explanation of valuation basis]
+### Governance Structure
+[Describe decision-making structure if discussed]
 
 Only include information that was actually provided.""",
 
-    2: """Generate structured Yield Design section:
+    2: """Generate structured content for the Token Overview & Classification section:
 
-## 收益设计
+## Token Overview & Classification
 
-### 收益分配
-- **预期年化收益率**: [Yield rate]
-- **分配频率**: [Distribution frequency]
-- **计算方式**: [Calculation method]
+### Token Utility
+[Describe what the token represents and how it is used]
 
-### 收益来源
-[Description of yield sources]
+### Legal Classification
+- **Classification**: [Security Token / Payment Token / Utility Token]
+- **Applicable Standard**: [MAS / SEC / FINMA / etc.]
+- **Transferability**: [Restricted / Unrestricted]
 
-Only include provided information.""",
-
-    3: """Generate structured Legal Structure section:
-
-## 法律架构
-
-### SPV架构
-- **架构类型**: [SPV type]
-- **注册地**: [Jurisdiction]
-- **法律顾问**: [Legal advisor if mentioned]
-
-### 合规要点
-[Key compliance considerations]
+### Token Rights
+[Describe holder rights: voting, dividends, redemption, etc.]
 
 Only include provided information.""",
 
-    4: """Generate structured Compliance section:
+    3: """Generate structured content for the Legal & Regulatory section:
 
-## 合规安排
+## Legal & Regulatory
 
-### 投资者资格
-- **合格投资者要求**: [Requirements]
-- **KYC/AML**: [Procedures]
+### Offering Structure
+- **Offering Route**: [Private Placement / Public Offering / Regulation D / etc.]
+- **Jurisdictions**: [Countries where offering is valid]
+- **Exemptions Applied**: [If any regulatory exemptions]
 
-### 监管合规
-- **适用法规**: [Applicable regulations]
-- **备案要求**: [Filing requirements]
+### Investor Eligibility
+- **Eligible Investors**: [Accredited / Qualified / Institutional / Retail]
+- **Minimum Investment**: [If mentioned]
 
-Only include provided information.""",
+### KYC/AML Compliance
+- **KYC Provider**: [If mentioned]
+- **AML Policy**: [Brief description]
 
-    5: """Generate structured Tokenomics section:
-
-## 代币经济模型
-
-### 代币发行
-- **代币名称**: [Token name]
-- **代币符号**: [Token symbol]
-- **发行总量**: [Total supply]
-- **代币精度**: [Decimals]
-
-### 分配方案
-[Token distribution plan]
+### Regulatory Filings
+[Any filings or registrations required]
 
 Only include provided information.""",
 
-    6: """Generate Final Review summary combining all completed sections.
-Create a comprehensive summary of the entire whitepaper."""
+    4: """Generate structured content for the Tokenomics section:
+
+## Tokenomics
+
+### Token Supply
+- **Total Supply**: [Total token amount]
+- **Initial Circulating Supply**: [If mentioned]
+- **Hard Cap**: [If applicable]
+
+### Allocation
+[Token distribution table: Team / Investors / Treasury / Public / etc.]
+
+### Unlock Schedule
+[Vesting / lock-up periods if mentioned]
+
+### Treasury Management
+[How treasury funds are managed]
+
+Only include provided information.""",
+
+    5: """Generate structured content for the Fundraising & Use of Proceeds section:
+
+## Fundraising & Use of Proceeds
+
+### Funding History
+[Past funding rounds, amounts, and investors if mentioned]
+
+### Current Offering
+- **Fundraising Target**: [Amount]
+- **Token Price**: [If mentioned]
+- **Offering Period**: [Dates if mentioned]
+
+### Use of Proceeds
+[How raised funds will be allocated — development, operations, reserves, etc.]
+
+Only include provided information.""",
+
+    6: """Generate structured content for the Technology & Security section:
+
+## Technology & Security
+
+### Blockchain Infrastructure
+- **Network**: [Blockchain platform]
+- **Smart Contract Address**: [If provided]
+- **Token Standard**: [ERC-20 / ERC-3643 / ERC-1400]
+
+### Smart Contract Features
+[Key contract functions and mechanisms]
+
+### Security Audits
+- **Auditor**: [Audit firm if mentioned]
+- **Audit Date**: [If mentioned]
+- **Audit Report**: [Link or status]
+
+### Custody & Key Management
+[How keys and assets are secured]
+
+Only include provided information.""",
+
+    7: """Generate structured content for the Listing & Trading section:
+
+## Listing & Trading
+
+### Exchange Listings
+[List of exchanges or platforms where token will be / is listed]
+
+### Trading Pairs
+[Token trading pairs, e.g. TOKEN/USDT, TOKEN/ETH]
+
+### Liquidity Provisions
+[Market maker arrangements, liquidity pool details if mentioned]
+
+### Transfer Restrictions
+[Any lock-up periods post-listing or transfer restrictions for holders]
+
+Only include provided information.""",
+
+    8: """Generate structured content for the Market Integrity & Disclosure section:
+
+## Market Integrity & Disclosure
+
+### Insider Trading Policy
+[Rules for team/insider trading, lock-up periods]
+
+### Disclosure Obligations
+[Ongoing disclosure requirements: financial reports, material events, etc.]
+
+### Price Manipulation Prevention
+[Measures to prevent wash trading or price manipulation]
+
+### Investor Communication
+[Channels and frequency of investor updates]
+
+Only include provided information.""",
+
+    9: """Generate structured content for the Key Risks section:
+
+## Key Risks
+
+### Legal & Regulatory Risks
+[Regulatory changes, licensing risks, jurisdictional risks]
+
+### Technical Risks
+[Smart contract vulnerabilities, network risks, custody risks]
+
+### Market Risks
+[Liquidity risk, price volatility, market conditions]
+
+### Operational Risks
+[Team, execution, counterparty risks]
+
+### Issuer-Specific Risks
+[Risks specific to the underlying asset or business]
+
+Only include provided information. Be concise and factual.""",
+
+    10: """Generate structured content for the Incident Response & Delisting section:
+
+## Incident Response & Delisting
+
+### Incident Response Procedures
+- **Security Breach Protocol**: [Steps if contract is compromised]
+- **Emergency Pause**: [Whether contract has pause functionality]
+- **Communication Plan**: [How incidents are communicated to holders]
+
+### Delisting Triggers
+[Conditions that would lead to exchange delisting or offering termination]
+
+### Redemption & Wind-Down
+[Procedures for token buyback, redemption, or project wind-down]
+
+Only include provided information.""",
+
+    11: """Generate structured content for the Declarations & Signatures section:
+
+## Declarations & Signatures
+
+### Authenticity Statement
+[Statement confirming accuracy of information in the whitepaper]
+
+### Risk Disclosure
+[Formal risk disclosure statement: investment involves risk, no guaranteed returns, etc.]
+
+### Regulatory Disclaimer
+[Jurisdiction-specific disclaimers, not financial advice, etc.]
+
+### Signatories
+[Authorized representatives signing the document — names, titles, date]
+
+Only include provided information. Use formal legal language.""",
 }
 
 # Contract step content generation prompts
@@ -408,14 +540,16 @@ def get_system_prompt(phase: str, current_step: int, completed_steps: list) -> s
     steps = WHITEPAPER_STEPS if phase == "whitepaper" else CONTRACT_STEPS
     current_step_name = steps.get(current_step, "Unknown Step")
 
-    base_prompt = f"""
-You are Lexstudio Build Mode AI. Guide users through RWA asset creation.
+    total_steps = len(WHITEPAPER_STEPS) if phase == "whitepaper" else len(CONTRACT_STEPS)
 
-**Current**: Step {current_step + 1}/7 - {current_step_name}
+    base_prompt = f"""
+You are Lexstudio Build Mode AI. Guide users through RWA whitepaper creation.
+
+**Current**: Step {current_step + 1}/{total_steps} - {current_step_name}
 
 ## CRITICAL: Language Rule
 **Always respond to the user in the SAME language they use (Chinese/English).**
-However, when generating whitepaper or contract content, use professional English for international standards.
+However, when generating whitepaper content, use professional English for international standards.
 - Conversation: Match user's language
 - Generated documents: English
 
@@ -432,13 +566,18 @@ However, when generating whitepaper or contract content, use professional Englis
     # Add step-specific guidance - concise
     if phase == "whitepaper":
         step_focus = {
-            0: "收集: 资产类型、名称、位置、规模",
-            1: "收集: 估值金额、估值方法、数据来源",
-            2: "收集: 预期收益率、分配频率",
-            3: "收集: SPV类型、注册地",
-            4: "收集: 投资者资格要求、KYC/AML",
-            5: "收集: 代币总量、分配方案",
-            6: "确认所有信息，请用户审核"
+            0: "Collect: token symbol, contract address, blockchain network, brief project description",
+            1: "Collect: legal entity name, registration jurisdiction, core team roles and responsibilities",
+            2: "Collect: token utility, legal classification (security/utility/payment), holder rights",
+            3: "Collect: offering route, eligible investor types, KYC/AML provider, applicable regulations",
+            4: "Collect: total supply, allocation breakdown, vesting/unlock schedule, treasury management",
+            5: "Collect: past funding rounds, current fundraising target, token price, use of proceeds breakdown",
+            6: "Collect: blockchain network, smart contract standard, security audit firm and status",
+            7: "Collect: exchange listing plans, trading pairs, liquidity provisions, post-listing transfer restrictions",
+            8: "Collect: insider trading policy, ongoing disclosure obligations, investor communication channels",
+            9: "Collect: legal risks, technical risks, market risks, operational and issuer-specific risks",
+            10: "Collect: incident response procedures, emergency pause capability, delisting triggers, wind-down process",
+            11: "Confirm all information is accurate; collect authorized signatories and finalize risk disclaimers",
         }
         base_prompt += step_focus.get(current_step, "")
     else:  # contract phase
