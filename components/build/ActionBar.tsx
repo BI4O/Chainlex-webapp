@@ -4,47 +4,52 @@ import { useLexstudioStore } from '@/lib/store';
 
 export function ActionBar() {
   const completedSteps = useLexstudioStore((state) => state.completedSteps);
-  const phase = useLexstudioStore((state) => state.phase);
   const whitepaperContent = useLexstudioStore((state) => state.whitepaperContent);
   const contractContent = useLexstudioStore((state) => state.contractContent);
 
-  const whitepaperComplete = completedSteps.length >= 12 && phase === 'whitepaper';
-  const contractComplete = completedSteps.length >= 12 && phase === 'contract';
+  // Both buttons unlock when step 9 (Final Review) is completed
+  const workflowComplete = completedSteps.includes(9);
 
   const handleExport = () => {
     if (!whitepaperContent) return;
-    // TODO: Implement export functionality
-    console.log('Exporting whitepaper...');
+    // Export whitepaper as markdown file
+    const blob = new Blob([whitepaperContent], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'whitepaper.md';
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleDeploy = () => {
     if (!contractContent) return;
-    // TODO: Implement deploy functionality
-    console.log('Deploying contract...');
+    // Export contract as Solidity file
+    const blob = new Blob([contractContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Token.sol';
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
     <div className="flex gap-3">
       <button
         onClick={handleExport}
-        disabled={!whitepaperComplete}
+        disabled={!workflowComplete}
         className={`
           flex-1 h-11 px-4 font-body text-sm font-medium
           rounded-lg transition-all duration-200
           flex items-center justify-center gap-2
-          ${whitepaperComplete
+          ${workflowComplete
             ? 'bg-[#324998] text-white hover:bg-[#2a3d7f] active:scale-[0.98] shadow-sm hover:shadow-md'
             : 'bg-gray-100 text-gray-400 cursor-not-allowed'
           }
         `}
       >
-        {/* Export Icon */}
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -57,24 +62,18 @@ export function ActionBar() {
 
       <button
         onClick={handleDeploy}
-        disabled={!contractComplete}
+        disabled={!workflowComplete}
         className={`
           flex-1 h-11 px-4 font-body text-sm font-medium
           rounded-lg transition-all duration-200
           flex items-center justify-center gap-2
-          ${contractComplete
+          ${workflowComplete
             ? 'bg-[#324998] text-white hover:bg-[#2a3d7f] active:scale-[0.98] shadow-sm hover:shadow-md'
             : 'bg-gray-100 text-gray-400 cursor-not-allowed'
           }
         `}
       >
-        {/* Deploy Icon */}
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"

@@ -23,6 +23,7 @@ export function InputBox() {
   const updateAssetData = useLexstudioStore((state) => state.updateAssetData);
   const updateWhitepaper = useLexstudioStore((state) => state.updateWhitepaper);
   const updateContract = useLexstudioStore((state) => state.updateContract);
+  const updateArchMap = useLexstudioStore((state) => state.updateArchMap);
 
   // Sidebar state for dynamic positioning
   const sidebarCollapsed = useLexstudioStore((state) => state.sidebarCollapsed);
@@ -33,7 +34,6 @@ export function InputBox() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Block submission when generating or no input
     if (!input.trim() || loading || isGenerating) return;
 
     const userInput = input.trim();
@@ -42,27 +42,16 @@ export function InputBox() {
     setIsGenerating(true);
     streamingContentRef.current = '';
 
-    // Add user message
-    addMessage({
-      role: 'user',
-      content: userInput,
-    });
-
-    // Add placeholder for AI message with loading dots
-    addMessage({
-      role: 'assistant',
-      content: '...',
-    });
+    addMessage({ role: 'user', content: userInput });
+    addMessage({ role: 'assistant', content: '...' });
 
     try {
       setLoading(false);
 
-      // Choose API endpoint based on mode
       const apiEndpoint = mode === 'build'
         ? 'http://localhost:8000/api/build/stream'
         : 'http://localhost:8000/api/chat/stream';
 
-      // Prepare request body based on mode
       const requestBody = mode === 'build'
         ? {
             user_input: userInput,
@@ -83,12 +72,9 @@ export function InputBox() {
             })),
           };
 
-      // Use EventSource for Server-Sent Events
       const response = await fetch(apiEndpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
       });
 
@@ -99,9 +85,7 @@ export function InputBox() {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
 
-      if (!reader) {
-        throw new Error('No reader available');
-      }
+      if (!reader) throw new Error('No reader available');
 
       while (true) {
         const { done, value } = await reader.read();
@@ -113,19 +97,15 @@ export function InputBox() {
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const data = line.slice(6);
-            if (data === '[DONE]') {
-              break;
-            }
+            if (data === '[DONE]') break;
 
             try {
               const parsed = JSON.parse(data);
               if (parsed.token) {
                 streamingContentRef.current += parsed.token;
-                // Update the last message with accumulated content
                 const currentMessages = useLexstudioStore.getState().messages;
                 const lastMessage = currentMessages[currentMessages.length - 1];
                 if (lastMessage && lastMessage.role === 'assistant') {
-                  // Force update by creating new array
                   useLexstudioStore.setState({
                     messages: [
                       ...currentMessages.slice(0, -1),
@@ -134,14 +114,13 @@ export function InputBox() {
                   });
                 }
               }
-            } catch (e) {
+            } catch {
               // Ignore parse errors for incomplete chunks
             }
           }
         }
       }
     } catch (error) {
-      // Update last message with error
       const currentMessages = useLexstudioStore.getState().messages;
       useLexstudioStore.setState({
         messages: [
@@ -155,48 +134,41 @@ export function InputBox() {
     } finally {
       setIsGenerating(false);
 
-      // In Build Mode, check for step completion signals
       if (mode === 'build') {
         const responseContent = streamingContentRef.current.toLowerCase();
 
-        // Detect confirmation keywords (用户确认关键词)
         const confirmKeywords = ['confirm', 'confirmed', 'complete', 'completed', 'done', 'yes', '好的', '确认', '完成', '是的', '可以', '没问题'];
         const hasConfirmIntent = confirmKeywords.some(keyword =>
           userInput.toLowerCase().includes(keyword)
         );
 
-        // Detect step completion signals in AI response
-        const stepCompleteSignals = ['let\'s move to', 'next step', 'proceed to', 'now we can', '进入下一步', '继续下一步', '接下来'];
+        const stepCompleteSignals = ["let's move to", 'next step', 'proceed to', 'now we can', '进入下一步', '继续下一步', '接下来'];
         const aiSuggestsNextStep = stepCompleteSignals.some(signal =>
           responseContent.includes(signal)
         );
 
-        // If user confirms or AI suggests next step, mark current step as complete
         if (hasConfirmIntent || aiSuggestsNextStep) {
-          // Get current state for API call
           const currentMessages = useLexstudioStore.getState().messages;
           const currentAssetData = useLexstudioStore.getState().assetData;
 
-          // Generate structured content via API
+          // Generate structured content via unified API
           generateStepContentViaAPI(currentStep, phase, currentMessages, currentAssetData);
 
-          // Generate/update project title (especially for first step)
+          // Generate project title on step 0
           if (currentStep === 0) {
             generateTitleViaAPI(currentMessages, currentAssetData);
           }
 
-          // Add current step to completed steps
           if (!completedSteps.includes(currentStep)) {
             addCompletedStep(currentStep);
           }
 
-          // Move to next step if not at the last step
-          if (currentStep < 11) {
+          // Unified 10-step workflow: advance up to step 9
+          if (currentStep < 9) {
             setCurrentStep(currentStep + 1);
           }
         }
 
-        // Update asset data based on user input
         extractAssetData(userInput, currentStep);
       }
 
@@ -204,10 +176,10 @@ export function InputBox() {
     }
   };
 
-  // Helper function to generate structured content via API
+  // Generate structured content via the unified /api/build/content endpoint
   const generateStepContentViaAPI = async (
     step: number,
-    phase: string,
+    phaseValue: string,
     history: typeof messages,
     assetDataValue: typeof assetData
   ) => {
@@ -217,25 +189,46 @@ export function InputBox() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           step,
-          phase,
-          history: history.map(m => ({
-            role: m.role,
-            content: m.content,
-          })),
+          phase: phaseValue,
+          history: history.map(m => ({ role: m.role, content: m.content })),
           asset_data: assetDataValue,
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        if (data.success && data.content) {
-          // Append structured content to whitepaper/contract
-          if (phase === 'whitepaper') {
-            const currentContent = useLexstudioStore.getState().whitepaperContent;
-            updateWhitepaper(currentContent + '\n\n' + data.content);
-          } else {
-            const currentContent = useLexstudioStore.getState().contractContent;
-            updateContract(currentContent + '\n\n' + data.content);
+        if (data.success) {
+          // Update whitepaper content
+          if (data.whitepaper_content) {
+            const currentWp = useLexstudioStore.getState().whitepaperContent;
+            updateWhitepaper(currentWp + '\n\n' + data.whitepaper_content);
+          }
+
+          // Update contract content (triggers diff computation in store)
+          if (data.contract_snippet) {
+            const currentContract = useLexstudioStore.getState().contractContent;
+            // If no existing contract, prepend to template; otherwise append snippet
+            if (!currentContract) {
+              updateContract(data.contract_snippet);
+            } else {
+              // Insert snippet before closing brace of contract
+              const insertPoint = currentContract.lastIndexOf('\n}');
+              if (insertPoint !== -1) {
+                const updated =
+                  currentContract.slice(0, insertPoint) +
+                  '\n\n    // Step ' + step + ' additions\n' +
+                  data.contract_snippet +
+                  currentContract.slice(insertPoint);
+                updateContract(updated);
+              } else {
+                updateContract(currentContract + '\n\n' + data.contract_snippet);
+              }
+            }
+          }
+
+          // Update arch map if provided
+          if (data.arch_map_update) {
+            updateArchMap(data.arch_map_update);
           }
         }
       }
@@ -244,7 +237,6 @@ export function InputBox() {
     }
   };
 
-  // Helper function to generate project title via API
   const generateTitleViaAPI = async (
     history: typeof messages,
     assetDataValue: typeof assetData
@@ -254,10 +246,7 @@ export function InputBox() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          history: history.map(m => ({
-            role: m.role,
-            content: m.content,
-          })),
+          history: history.map(m => ({ role: m.role, content: m.content })),
           asset_data: assetDataValue,
         }),
       });
@@ -265,7 +254,6 @@ export function InputBox() {
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.title) {
-          // Update asset data with generated title
           updateAssetData({ name: data.title });
         }
       }
@@ -274,11 +262,9 @@ export function InputBox() {
     }
   };
 
-  // Helper function to extract asset data from user input
-  const extractAssetData = (input: string, step: number) => {
-    const inputLower = input.toLowerCase();
+  const extractAssetData = (userInputText: string, step: number) => {
+    const inputLower = userInputText.toLowerCase();
 
-    // Step 0: Asset Onboarding - extract type only (name will be generated by AI)
     if (step === 0) {
       if (inputLower.includes('real estate') || inputLower.includes('房地产') || inputLower.includes('房产') || inputLower.includes('写字楼') || inputLower.includes('商业')) {
         updateAssetData({ type: 'Real Estate' });
@@ -289,19 +275,16 @@ export function InputBox() {
       } else if (inputLower.includes('art') || inputLower.includes('艺术品')) {
         updateAssetData({ type: 'Art' });
       }
-      // Name will be generated by AI via generateTitleViaAPI
-    }
 
-    // Step 2: Yield Design - extract yield rate
-    if (step === 2) {
-      const yieldMatch = input.match(/(\d+(?:\.\d+)?)\s*%/);
-      if (yieldMatch) {
-        updateAssetData({ yieldRate: parseFloat(yieldMatch[1]) });
+      // Extract token symbol
+      const symbolMatch = userInputText.match(/\b([A-Z]{2,8})\b/);
+      if (symbolMatch) {
+        updateAssetData({ tokenSymbol: symbolMatch[1] });
       }
     }
 
-    // Step 3: Legal Structure - extract jurisdiction
-    if (step === 3) {
+    if (step === 1) {
+      // Extract issuer info
       if (inputLower.includes('cayman') || inputLower.includes('开曼')) {
         updateAssetData({ legalStructure: 'Cayman SPV' });
       } else if (inputLower.includes('singapore') || inputLower.includes('新加坡')) {
@@ -311,39 +294,44 @@ export function InputBox() {
       }
     }
 
-    // Step 5: Tokenomics - extract total supply
-    if (step === 5) {
-      const supplyMatch = input.match(/(\d+(?:,\d+)*)\s*(?:tokens?|代币)?/i);
+    if (step === 2) {
+      const supplyMatch = userInputText.match(/(\d+(?:,\d+)*)\s*(?:tokens?|代币)?/i);
       if (supplyMatch) {
         const supply = parseInt(supplyMatch[1].replace(/,/g, ''));
         updateAssetData({ totalSupply: supply });
       }
     }
-  };
 
-  // Phase switch state
-  const setPhase = useLexstudioStore((state) => state.setPhase);
-  const [showPhaseSwitch, setShowPhaseSwitch] = useState(false);
-
-  // Check if whitepaper is complete (all 7 steps done)
-  const isWhitepaperComplete = phase === 'whitepaper' && completedSteps.includes(11);
-
-  // Show phase switch prompt when whitepaper is complete
-  if (isWhitepaperComplete && !showPhaseSwitch) {
-    setShowPhaseSwitch(true);
-  }
-
-  const handlePhaseSwitch = (confirm: boolean) => {
-    if (confirm) {
-      setPhase('contract');
+    if (step === 3) {
+      if (inputLower.includes('kyc')) {
+        const kycMatch = userInputText.match(/kyc[:\s]+([a-z0-9\s]+)/i);
+        if (kycMatch) updateAssetData({ kycProvider: kycMatch[1].trim() });
+      }
+      if (inputLower.includes('private placement') || inputLower.includes('私募')) {
+        updateAssetData({ offeringRoute: 'Private Placement' });
+      }
     }
-    setShowPhaseSwitch(false);
+
+    if (step === 4) {
+      const yieldMatch = userInputText.match(/(\d+(?:\.\d+)?)\s*%/);
+      if (yieldMatch) {
+        updateAssetData({ yieldRate: parseFloat(yieldMatch[1]) });
+      }
+    }
+
+    if (step === 7) {
+      if (inputLower.includes('ethereum') || inputLower.includes('eth mainnet')) {
+        updateAssetData({ deployNetwork: 'Ethereum Mainnet' });
+      } else if (inputLower.includes('polygon')) {
+        updateAssetData({ deployNetwork: 'Polygon' });
+      } else if (inputLower.includes('base')) {
+        updateAssetData({ deployNetwork: 'Base' });
+      }
+    }
   };
 
   const isBuildMode = mode === 'build';
 
-  // Calculate left position based on sidebar state
-  // Sidebar is 240px (w-60) when expanded, 32px (w-8) when collapsed
   const sidebarWidth = sidebarCollapsed ? 32 : 240;
   const leftPosition = isBuildMode ? 'auto' : `${sidebarWidth + 40}px`;
 
@@ -358,28 +346,6 @@ export function InputBox() {
         transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
       }}
     >
-      {/* Phase Switch Confirmation */}
-      {showPhaseSwitch && isBuildMode && (
-        <div className="mb-4 border-2 border-white bg-[#324998] p-4 rounded-xl shadow-lg">
-          <p className="text-white font-body text-sm mb-3">
-            商业逻辑已锁定，是否开始技术建模？
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={() => handlePhaseSwitch(true)}
-              className="px-4 py-2 bg-white text-[#324998] font-body text-sm font-medium hover:bg-[#f0f2f5] transition-all duration-200 rounded-lg shadow-sm hover:shadow-md"
-            >
-              开始合约设计
-            </button>
-            <button
-              onClick={() => handlePhaseSwitch(false)}
-              className="px-4 py-2 border-2 border-white text-white font-body text-sm font-medium hover:bg-white hover:text-[#324998] transition-all duration-200 rounded-lg"
-            >
-              稍后
-            </button>
-          </div>
-        </div>
-      )}
       <div className={`
         border transition-all duration-300 ease-in-out rounded-xl shadow-lg
         ${isBuildMode
@@ -387,7 +353,7 @@ export function InputBox() {
           : 'bg-white border-[#E5E7EB]'
         }
       `}>
-        {/* Mode Toggle - Redesigned */}
+        {/* Mode Toggle */}
         <div className={`
           flex items-center justify-between px-6 py-3 border-b transition-colors duration-300
           ${isBuildMode ? 'border-white/20' : 'border-[#E5E7EB]'}
@@ -399,7 +365,6 @@ export function InputBox() {
             Mode
           </span>
 
-          {/* Toggle Switch */}
           <button
             onClick={() => setMode(mode === 'chat' ? 'build' : 'chat')}
             className="relative flex items-center gap-0 font-body text-xs font-semibold uppercase tracking-wide overflow-hidden"

@@ -19,6 +19,7 @@ export interface Session {
   currentStep?: number;
   completedSteps?: number[];
   phase?: Phase;
+  archMapContent?: string;
 }
 
 export interface UploadedFile {
@@ -42,11 +43,26 @@ export interface AssetData {
   jurisdictions?: string[];
   uploadedFiles?: UploadedFile[];
   onboardingCompleted?: boolean;
+  // New unified fields
+  tokenSymbol?: string;
+  issuerLegalName?: string;
+  offeringRoute?: string;
+  kycProvider?: string;
+  navPerToken?: number;
+  deployNetwork?: string;
+  auditFirm?: string;
+  multisigConfig?: string;
+  upgradeStrategy?: string;
 }
 
 export type Mode = 'chat' | 'build';
-export type Phase = 'whitepaper' | 'contract';
+export type Phase = 'whitepaper' | 'contract' | 'unified';
 export type PreviewTab = 'whitepaper' | 'contract' | 'arch-map';
+
+export interface ContractDiff {
+  added: number[];
+  modified: number[];
+}
 
 export interface LexstudioStore {
   // Mode
@@ -83,8 +99,15 @@ export interface LexstudioStore {
   // Generated content
   whitepaperContent: string;
   contractContent: string;
+  archMapContent: string;
   updateWhitepaper: (content: string) => void;
   updateContract: (content: string) => void;
+  updateArchMap: (content: string) => void;
+
+  // Contract diff (not persisted, for transient highlight)
+  contractDiff: ContractDiff;
+  setContractDiff: (diff: ContractDiff) => void;
+  clearContractDiff: () => void;
 
   // Sidebar state
   sidebarCollapsed: boolean;

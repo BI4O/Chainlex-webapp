@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { LexstudioStore, Message, Session, AssetData, Phase } from './types';
+import { LexstudioStore, Message, Session, AssetData, Phase, ContractDiff } from './types';
 
 // Helper function to generate session title from first message
 const generateSessionTitle = (messages: Message[]): string => {
@@ -17,9 +17,10 @@ const workspaceFromSession = (session: Session) => ({
   assetData: session.assetData ?? {},
   whitepaperContent: session.whitepaperContent ?? '',
   contractContent: session.contractContent ?? '',
+  archMapContent: session.archMapContent ?? '',
   currentStep: session.currentStep ?? 0,
   completedSteps: session.completedSteps ?? [],
-  phase: session.phase ?? ('whitepaper' as Phase),
+  phase: session.phase ?? ('unified' as Phase),
 });
 
 // Snapshot current workspace state back into a session object
@@ -29,6 +30,7 @@ const snapshotToSession = (session: Session, state: {
   assetData: AssetData;
   whitepaperContent: string;
   contractContent: string;
+  archMapContent: string;
   currentStep: number;
   completedSteps: number[];
   phase: Phase;
@@ -39,6 +41,7 @@ const snapshotToSession = (session: Session, state: {
   assetData: state.assetData,
   whitepaperContent: state.whitepaperContent,
   contractContent: state.contractContent,
+  archMapContent: state.archMapContent,
   currentStep: state.currentStep,
   completedSteps: state.completedSteps,
   phase: state.phase,
@@ -51,6 +54,7 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
   setMode: (mode) => {
     set((state) => ({
       mode,
+      phase: mode === 'build' ? 'unified' : state.phase,
       showOnboardingModal: mode === 'build',
       // Sync mode into current session
       sessions: state.sessions.map(s =>
@@ -86,9 +90,10 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
       assetData: {},
       whitepaperContent: '',
       contractContent: '',
+      archMapContent: '',
       currentStep: 0,
       completedSteps: [],
-      phase: 'whitepaper',
+      phase: 'unified',
     };
 
     set({
@@ -98,10 +103,12 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
       assetData: {},
       whitepaperContent: '',
       contractContent: '',
+      archMapContent: '',
       currentStep: 0,
       completedSteps: [],
-      phase: 'whitepaper',
+      phase: 'unified',
       showOnboardingModal: isBuild,
+      contractDiff: { added: [], modified: [] },
     });
 
     get().saveToLocalStorage();
@@ -125,6 +132,7 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
       sessions: updatedSessions,
       currentSessionId: sessionId,
       ...workspaceFromSession(targetSession),
+      contractDiff: { added: [], modified: [] },
       showOnboardingModal: targetSession.mode === 'build' && !targetSession.assetData?.onboardingCompleted,
     });
 
@@ -143,6 +151,7 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
           currentSessionId: nextSession.id,
           ...workspaceFromSession(nextSession),
           showOnboardingModal: false,
+          contractDiff: { added: [], modified: [] },
         });
       } else {
         set({ sessions: newSessions });
@@ -168,7 +177,7 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
   // Build Mode state
   currentStep: 0,
   completedSteps: [],
-  phase: 'whitepaper',
+  phase: 'unified',
   previewTab: 'whitepaper',
   setCurrentStep: (step) => {
     set((state) => ({
@@ -259,6 +268,7 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
   // Generated content
   whitepaperContent: '',
   contractContent: '',
+  archMapContent: '',
   updateWhitepaper: (content) => {
     set((state) => ({
       whitepaperContent: content,
@@ -269,13 +279,53 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
     get().saveToLocalStorage();
   },
   updateContract: (content) => {
+    set((state) => {
+      // Compute diff vs existing content
+      const oldLines = state.contractContent.split('\n');
+      const newLines = content.split('\n');
+      const added: number[] = [];
+      const modified: number[] = [];
+
+      newLines.forEach((line, idx) => {
+        if (idx >= oldLines.length) {
+          added.push(idx);
+        } else if (line !== oldLines[idx]) {
+          modified.push(idx);
+        }
+      });
+
+      return {
+        contractContent: content,
+        contractDiff: { added, modified },
+        sessions: state.sessions.map(s =>
+          s.id === state.currentSessionId ? { ...s, contractContent: content } : s
+        ),
+      };
+    });
+    get().saveToLocalStorage();
+
+    // Auto-clear diff after 3 seconds
+    setTimeout(() => {
+      get().clearContractDiff();
+    }, 3000);
+  },
+  updateArchMap: (content) => {
     set((state) => ({
-      contractContent: content,
+      archMapContent: content,
       sessions: state.sessions.map(s =>
-        s.id === state.currentSessionId ? { ...s, contractContent: content } : s
+        s.id === state.currentSessionId ? { ...s, archMapContent: content } : s
       ),
     }));
     get().saveToLocalStorage();
+  },
+
+  // Contract diff (not persisted)
+  contractDiff: { added: [], modified: [] },
+  setContractDiff: (diff: ContractDiff) => {
+    set({ contractDiff: diff });
+  },
+  clearContractDiff: () => {
+    set({ contractDiff: { added: [], modified: [] } });
   },
 
   // Sidebar state
@@ -310,6 +360,7 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
       sessions: sessionsToSave,
       sidebarCollapsed: state.sidebarCollapsed,
       previewTab: state.previewTab,
+      // contractDiff is NOT persisted
     }));
   },
 
@@ -349,6 +400,7 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
       sidebarCollapsed: stored.sidebarCollapsed ?? false,
       previewTab: stored.previewTab ?? 'whitepaper',
       isGenerating: false,
+      contractDiff: { added: [], modified: [] },
       showOnboardingModal: currentSession.mode === 'build' && !currentSession.assetData?.onboardingCompleted,
       ...workspaceFromSession(currentSession),
     });

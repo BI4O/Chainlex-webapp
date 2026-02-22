@@ -4,7 +4,10 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any
 from agents.chat_agent import run_chat_agent, stream_chat_agent
-from agents.build_agent import run_build_agent, stream_build_agent, generate_step_content, generate_project_title
+from agents.build_agent import (
+    run_build_agent, stream_build_agent, generate_step_content, generate_project_title,
+    ERC3643_TEMPLATE, ARCH_MAP_TEMPLATE
+)
 import json
 
 app = FastAPI(title="Lexstudio AI Backend")
@@ -40,7 +43,6 @@ async def chat_stream(request: ChatRequest):
     async def generate():
         try:
             async for token in stream_chat_agent(request.user_input, request.history):
-                # Send token as Server-Sent Event
                 yield f"data: {json.dumps({'token': token})}\n\n"
         except Exception as e:
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
@@ -60,9 +62,7 @@ async def chat_stream(request: ChatRequest):
 async def chat(request: ChatRequest):
     """Chat Mode API - conversational agent (non-streaming fallback)"""
     try:
-        # Run LangChain chat agent
         ai_response = run_chat_agent(request.user_input, request.history)
-
         return {
             "message": ai_response,
             "history": request.history + [
@@ -116,14 +116,11 @@ async def build(request: BuildRequest):
             request.phase,
             request.asset_data
         )
-
         return {
             "message": ai_response,
             "current_step": request.current_step,
             "completed_steps": request.completed_steps,
             "asset_data": request.asset_data,
-            "whitepaper_content": "",
-            "contract_content": "",
             "history": request.history + [
                 {"role": "user", "content": request.user_input},
                 {"role": "assistant", "content": ai_response}
@@ -135,8 +132,6 @@ async def build(request: BuildRequest):
             "current_step": request.current_step,
             "completed_steps": request.completed_steps,
             "asset_data": request.asset_data,
-            "whitepaper_content": "",
-            "contract_content": "",
             "history": request.history
         }
 
@@ -150,17 +145,30 @@ class ContentRequest(BaseModel):
 
 @app.post("/api/build/content")
 async def build_content(request: ContentRequest):
-    """Generate structured content for a completed step"""
+    """Generate structured content for a completed step.
+    Returns: { whitepaper_content, contract_snippet, arch_map_update, success }
+    """
     try:
-        content = generate_step_content(
+        result = generate_step_content(
             request.step,
             request.phase,
             request.history,
             request.asset_data
         )
-        return {"content": content, "success": True}
+        return {
+            "whitepaper_content": result.get("whitepaper_content", ""),
+            "contract_snippet": result.get("contract_snippet", ""),
+            "arch_map_update": result.get("arch_map_update", ""),
+            "success": True
+        }
     except Exception as e:
-        return {"content": "", "success": False, "error": str(e)}
+        return {
+            "whitepaper_content": "",
+            "contract_snippet": "",
+            "arch_map_update": "",
+            "success": False,
+            "error": str(e)
+        }
 
 
 class TitleRequest(BaseModel):
@@ -179,6 +187,15 @@ async def build_title(request: TitleRequest):
         return {"title": title, "success": True}
     except Exception as e:
         return {"title": "待命名项目", "success": False, "error": str(e)}
+
+
+@app.get("/api/build/templates")
+async def build_templates():
+    """Return ERC-3643 T-REX and Arch-Map initial templates"""
+    return {
+        "erc3643_template": ERC3643_TEMPLATE,
+        "arch_map_template": ARCH_MAP_TEMPLATE,
+    }
 
 
 if __name__ == "__main__":
