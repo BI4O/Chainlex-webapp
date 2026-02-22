@@ -332,14 +332,14 @@ export function InputBox() {
 
   const isBuildMode = mode === 'build';
 
-  const sidebarWidth = sidebarCollapsed ? 32 : 240;
-  const leftPosition = isBuildMode ? 'auto' : `${sidebarWidth + 40}px`;
+  const sidebarWidth = sidebarCollapsed ? 24 : 192;
+  const leftPosition = isBuildMode ? 'auto' : `${sidebarWidth + 32}px`;
 
   return (
     <div
       className={`
-        bottom-8
-        ${isBuildMode ? 'absolute left-8 right-8' : 'fixed right-16 mx-8'}
+        bottom-6
+        ${isBuildMode ? 'absolute left-6 right-6' : 'fixed right-12 mx-6'}
       `}
       style={{
         left: isBuildMode ? undefined : leftPosition,
@@ -347,7 +347,7 @@ export function InputBox() {
       }}
     >
       <div className={`
-        border transition-all duration-300 ease-in-out rounded-xl shadow-lg
+        border transition-all duration-300 ease-in-out rounded-lg shadow-md
         ${isBuildMode
           ? 'bg-[#324998] border-[#324998]'
           : 'bg-white border-[#E5E7EB]'
@@ -355,11 +355,11 @@ export function InputBox() {
       `}>
         {/* Mode Toggle */}
         <div className={`
-          flex items-center justify-between px-6 py-3 border-b transition-colors duration-300
+          flex items-center justify-between px-4 py-2 border-b transition-colors duration-300
           ${isBuildMode ? 'border-white/20' : 'border-[#E5E7EB]'}
         `}>
           <span className={`
-            font-body text-xs font-medium uppercase tracking-wide transition-colors duration-300
+            font-body text-[10px] font-medium uppercase tracking-wide transition-colors duration-300
             ${isBuildMode ? 'text-gray-400' : 'text-gray-500'}
           `}>
             Mode
@@ -367,10 +367,10 @@ export function InputBox() {
 
           <button
             onClick={() => setMode(mode === 'chat' ? 'build' : 'chat')}
-            className="relative flex items-center gap-0 font-body text-xs font-semibold uppercase tracking-wide overflow-hidden"
+            className="relative flex items-center gap-0 font-body text-[10px] font-semibold uppercase tracking-wide overflow-hidden"
           >
             <div className={`
-              relative w-32 h-8 border-2 transition-all duration-300 rounded-lg overflow-hidden
+              relative w-24 h-6 border transition-all duration-300 rounded overflow-hidden
               ${isBuildMode ? 'border-white' : 'border-[#324998]'}
             `}>
               {/* Sliding background */}
@@ -410,7 +410,7 @@ export function InputBox() {
         </div>
 
         {/* Input Form */}
-        <form onSubmit={handleSubmit} className="flex items-center gap-4 p-6">
+        <form onSubmit={handleSubmit} className="flex items-center gap-3 p-4">
           <input
             type="text"
             value={input}
@@ -430,7 +430,7 @@ export function InputBox() {
             }
             disabled={loading || isGenerating}
             className={`
-              flex-1 bg-transparent font-body text-base outline-none disabled:opacity-50
+              flex-1 bg-transparent font-body text-sm outline-none disabled:opacity-50
               transition-colors duration-300
               ${isBuildMode
                 ? 'text-white placeholder:text-gray-400'
@@ -442,8 +442,8 @@ export function InputBox() {
             type="submit"
             disabled={loading || isGenerating || !input.trim()}
             className={`
-              w-10 h-10 flex items-center justify-center font-mono text-xl
-              border-2 transition-all duration-200 rounded-lg
+              w-8 h-8 flex items-center justify-center font-mono text-lg
+              border-2 transition-all duration-200 rounded-md
               ${loading || isGenerating
                 ? isBuildMode
                   ? 'bg-white/30 text-white border-white/30 cursor-not-allowed'
@@ -459,7 +459,7 @@ export function InputBox() {
             `}
           >
             {loading || isGenerating ? (
-              <span className={`inline-block w-5 h-5 border-2 rounded-full animate-spin ${
+              <span className={`inline-block w-4 h-4 border-2 rounded-full animate-spin ${
                 isBuildMode
                   ? 'border-white border-t-transparent'
                   : 'border-[#324998] border-t-transparent'
