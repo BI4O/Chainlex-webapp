@@ -13,22 +13,22 @@ export function AssetWorkspace() {
   return (
     <div className="flex flex-col h-full bg-[#f0f2f5] overflow-hidden">
       {/* 1. Progress Card */}
-      <div className="px-6 pt-6 pb-4">
+      <div className="px-4 pt-4 pb-2">
         <ProgressCard />
       </div>
 
       {/* 2. Metadata Card */}
-      <div className="px-6 pb-4">
+      <div className="px-4 pb-2">
         <MetadataCard assetData={assetData} onUpdateAssetData={updateAssetData} />
       </div>
 
       {/* 3. Preview Content Card */}
-      <div className="flex-1 px-6 pb-6 min-h-0">
+      <div className="flex-1 px-4 pb-4 min-h-0">
         <PreviewCard />
       </div>
 
       {/* 4. Action Bar */}
-      <div className="px-6 pb-6 pt-2 bg-gradient-to-t from-[#f0f2f5] via-[#f0f2f5] to-transparent">
+      <div className="px-4 pb-4 pt-1 bg-gradient-to-t from-[#f0f2f5] via-[#f0f2f5] to-transparent">
         <ActionBar />
       </div>
     </div>

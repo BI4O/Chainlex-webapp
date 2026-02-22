@@ -55,13 +55,13 @@ export function MetadataCard({ assetData, onUpdateAssetData }: MetadataCardProps
       {/* Header - Always Visible */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-5 py-3.5 flex items-center justify-between hover:bg-gray-50 transition-colors duration-150 rounded-xl"
+        className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-gray-50 transition-colors duration-150 rounded-xl"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           {/* Icon */}
-          <div className="w-8 h-8 rounded-lg bg-[#324998]/10 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-[#324998]/10 flex items-center justify-center flex-shrink-0">
             <svg
-              className="w-4 h-4 text-[#324998]"
+              className="w-3.5 h-3.5 text-[#324998]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -77,10 +77,10 @@ export function MetadataCard({ assetData, onUpdateAssetData }: MetadataCardProps
 
           {/* Name and Type */}
           <div className="text-left">
-            <h3 className="font-body font-semibold text-base text-gray-900">
+            <h3 className="font-body font-semibold text-sm text-gray-900 leading-tight">
               {assetData.name || 'New Asset'}
             </h3>
-            <p className="font-body text-sm text-gray-500">
+            <p className="font-body text-xs text-gray-500 leading-tight">
               {assetData.type || 'Asset Type'}
             </p>
           </div>
@@ -88,7 +88,7 @@ export function MetadataCard({ assetData, onUpdateAssetData }: MetadataCardProps
 
         {/* Expand/Collapse Arrow */}
         <svg
-          className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${
+          className={`w-4 h-4 text-gray-400 transition-transform duration-300 flex-shrink-0 ${
             isExpanded ? 'rotate-180' : ''
           }`}
           fill="none"
