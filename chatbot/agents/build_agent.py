@@ -1,27 +1,36 @@
 """
-LangChain Build Agent for Lexstudio
-Task-oriented agent for Build Mode with 7-step workflow
+Build Agent for Lexstudio
+Task-oriented agent for Build Mode with 12-step workflow.
+Uses openai client directly for compatibility with third-party API providers.
 """
 
-from langchain.agents import create_agent, AgentState
-from langchain_openai import ChatOpenAI
-from langchain.tools import tool, ToolRuntime
-from langgraph.types import Command
-from langchain.messages import ToolMessage
+from openai import AsyncOpenAI, OpenAI
 from dotenv import load_dotenv
-from typing import Optional, AsyncIterator, Dict, Any
+from typing import AsyncIterator, Dict, Any
 import os
 
-# Load environment variables
 load_dotenv()
 
-# Initialize LLM
+_async_client = AsyncOpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    base_url=os.getenv("OPENAI_BASE_URL"),
+)
+
+_sync_client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    base_url=os.getenv("OPENAI_BASE_URL"),
+)
+
+# Keep llm for generate_step_content / generate_project_title (sync invoke)
+from langchain_openai import ChatOpenAI
 llm = ChatOpenAI(
     model=os.getenv("MODEL_NAME"),
     temperature=0.7,
     api_key=os.getenv("OPENAI_API_KEY"),
     base_url=os.getenv("OPENAI_BASE_URL"),
 )
+
+MODEL = os.getenv("MODEL_NAME", "gpt-4o")
 
 # Whitepaper steps
 WHITEPAPER_STEPS = {
@@ -456,8 +465,6 @@ Create a comprehensive summary of the entire smart contract design."""
 
 TITLE_GENERATION_PROMPT = """Based on the conversation, generate a concise, professional title for this RWA tokenization project.
 
-TITLE_GENERATION_PROMPT = """Based on the conversation, generate a concise, professional title for this RWA tokenization project.
-
 Rules:
 1. Maximum 30 characters in Chinese or 40 characters in English
 2. Format: [Asset Name] + [RWA/代币化] if applicable
@@ -494,7 +501,7 @@ Conversation history to extract information from:
 
 Current asset data: {asset_data}
 
-Generate the structured content now. Use Chinese for all content.
+Generate the structured content now. Write all content in professional English.
 """
 
         # Run LLM to generate structured content
@@ -534,7 +541,7 @@ Generate the title now. Return ONLY the title.
         return "待命名项目"
 
 
-def get_system_prompt(phase: str, current_step: int, completed_steps: list) -> str:
+def get_system_prompt(phase: str, current_step: int, completed_steps: list, asset_data: Dict[str, Any] = None) -> str:
     """Generate system prompt based on current phase and step"""
 
     steps = WHITEPAPER_STEPS if phase == "whitepaper" else CONTRACT_STEPS
@@ -542,26 +549,22 @@ def get_system_prompt(phase: str, current_step: int, completed_steps: list) -> s
 
     total_steps = len(WHITEPAPER_STEPS) if phase == "whitepaper" else len(CONTRACT_STEPS)
 
-    base_prompt = f"""
-You are Lexstudio Build Mode AI. Guide users through RWA whitepaper creation.
-
-**Current**: Step {current_step + 1}/{total_steps} - {current_step_name}
-
-## CRITICAL: Language Rule
-**Always respond to the user in the SAME language they use (Chinese/English).**
-However, when generating whitepaper content, use professional English for international standards.
-- Conversation: Match user's language
-- Generated documents: English
-
-## Response Rules
-- Maximum 50 words per response
-- Ask 1-2 questions at a time, not all at once
-- Use bullet points for lists
-- No greetings, no filler words
-- When user confirms info, say "确认。进入下一步。" briefly
-
-## Step Focus
-"""
+    base_prompt = (
+        f"You are Lexstudio Build Mode AI. Guide users through RWA whitepaper creation.\n\n"
+        f"**Current**: Step {current_step + 1}/{total_steps} - {current_step_name}\n\n"
+        "## CRITICAL: Language Rule\n"
+        "Always respond in the SAME language the user writes in. If they write English, reply in English. "
+        "If they write Chinese, reply in Chinese. Never mix languages in a single response. "
+        "All generated whitepaper/contract document content must be in professional English regardless of conversation language.\n\n"
+        "## Response Rules\n"
+        "- Keep replies concise (2-4 sentences max)\n"
+        "- Ask only 1-2 focused questions at a time\n"
+        "- No greetings or filler words\n"
+        "- When the user provides information, briefly acknowledge what was captured, then ask the next question to collect missing info for this step\n"
+        "- When all required info for this step is collected, summarize what was gathered and tell the user they can move on (e.g. 'Got it. Step X is complete — you can continue to the next step.')\n"
+        "- Never just say a single word or phrase like 'confirmed' with no follow-up guidance\n\n"
+        "## Step Focus\n"
+    )
 
     # Add step-specific guidance - concise
     if phase == "whitepaper":
@@ -582,29 +585,46 @@ However, when generating whitepaper content, use professional English for intern
         base_prompt += step_focus.get(current_step, "")
     else:  # contract phase
         step_focus = {
-            0: "收集: 合约标准选择 (ERC-3643/ERC-1400)、选择理由",
-            1: "收集: 铸造权限、铸造上限、铸造条件",
-            2: "收集: 白名单要求、转账限制、单笔限额",
-            3: "收集: KYC/AML要求、合规检查集成",
-            4: "收集: Oracle数据源、更新频率",
-            5: "确认测试计划、安全审计安排",
-            6: "确认合约设计，请用户审核"
+            0: "Collect: contract standard selection (ERC-3643 or ERC-1400), reason for choice",
+            1: "Collect: minting permissions, minting cap, minting conditions",
+            2: "Collect: whitelist requirements, transfer restrictions, per-transfer limits",
+            3: "Collect: KYC/AML requirements, compliance check integration details",
+            4: "Collect: oracle data sources, update frequency",
+            5: "Collect: test plan, unit test coverage, security audit arrangements",
+            6: "Final review: summarize the complete contract design and ask user to confirm"
         }
         base_prompt += step_focus.get(current_step, "")
 
+    # Inject jurisdiction context
+    if asset_data and asset_data.get('jurisdictions'):
+        jurisdiction_names = {
+            'HK': 'Hong Kong (SFC/HKMA framework)',
+            'UAE': 'UAE (ADGM/VARA framework)',
+            'US': 'United States (SEC/FINRA framework)',
+            'SG': 'Singapore (MAS framework)',
+        }
+        j_list = ', '.join([jurisdiction_names.get(j, j) for j in asset_data['jurisdictions']])
+        base_prompt += f"\n\n## Regulatory Context\nThis token is being issued under: {j_list}\nAll compliance guidance must align with these jurisdictions."
+
+    # Inject uploaded file summaries
+    if asset_data and asset_data.get('uploadedFiles'):
+        base_prompt += "\n\n## Uploaded Materials\n"
+        for f in asset_data['uploadedFiles'][:3]:  # max 3 to avoid token overflow
+            base_prompt += f"- {f['name']}: {f.get('content', '')[:500]}\n"
+
     return base_prompt
 
-# Create build agent
-def create_build_agent_instance(phase: str, current_step: int, completed_steps: list):
-    """Create a build agent with current context"""
-    system_prompt = get_system_prompt(phase, current_step, completed_steps)
+def _build_messages(user_input: str, history: list, system_prompt: str) -> list:
+    """Convert history + user input into OpenAI message dicts."""
+    messages = [{"role": "system", "content": system_prompt}]
+    for msg in history:
+        role = msg.get("role", "user")
+        content = msg.get("content", "")
+        if role in ("user", "assistant"):
+            messages.append({"role": role, "content": content})
+    messages.append({"role": "user", "content": user_input})
+    return messages
 
-    return create_agent(
-        model=llm,
-        tools=[],  # No tools for now, can add later
-        system_prompt=system_prompt,
-        state_schema=AgentState,
-    )
 
 async def stream_build_agent(
     user_input: str,
@@ -614,33 +634,22 @@ async def stream_build_agent(
     phase: str,
     asset_data: Dict[str, Any]
 ) -> AsyncIterator[str]:
-    """
-    Stream the build agent response token by token
-    """
+    """Stream the build agent response token by token."""
     try:
-        # Create agent with current context
-        agent = create_build_agent_instance(phase, current_step, completed_steps)
-
-        # Convert history to messages
-        messages = []
-        for msg in history:
-            messages.append(msg.get("content", ""))
-
-        # Add current user input
-        messages.append(user_input)
-
-        # Stream agent
-        async for event in agent.astream_events(
-            {"messages": messages},
-            version="v2"
-        ):
-            if event["event"] == "on_chat_model_stream":
-                chunk = event["data"]["chunk"]
-                if hasattr(chunk, 'content') and chunk.content:
-                    yield chunk.content
-
+        system_prompt = get_system_prompt(phase, current_step, completed_steps, asset_data)
+        messages = _build_messages(user_input, history, system_prompt)
+        stream = await _async_client.chat.completions.create(
+            model=MODEL,
+            messages=messages,
+            stream=True,
+        )
+        async for chunk in stream:
+            delta = chunk.choices[0].delta.content if chunk.choices else None
+            if delta:
+                yield delta
     except Exception as e:
         yield f"\n\nError: {str(e)}"
+
 
 def run_build_agent(
     user_input: str,
@@ -650,32 +659,15 @@ def run_build_agent(
     phase: str,
     asset_data: Dict[str, Any]
 ) -> str:
-    """
-    Run the build agent (non-streaming version)
-    """
+    """Run the build agent (non-streaming fallback)."""
     try:
-        # Create agent with current context
-        agent = create_build_agent_instance(phase, current_step, completed_steps)
-
-        # Convert history to messages
-        messages = []
-        for msg in history:
-            messages.append(msg.get("content", ""))
-
-        # Add current user input
-        messages.append(user_input)
-
-        # Run agent
-        state = agent.invoke({"messages": messages})
-
-        # Extract last AI message
-        if state and "messages" in state:
-            last_message = state["messages"][-1]
-            if hasattr(last_message, 'content'):
-                return last_message.content
-            return str(last_message)
-
-        return "I'm here to help you build your RWA asset!"
-
+        system_prompt = get_system_prompt(phase, current_step, completed_steps, asset_data)
+        messages = _build_messages(user_input, history, system_prompt)
+        response = _sync_client.chat.completions.create(
+            model=MODEL,
+            messages=messages,
+            stream=False,
+        )
+        return response.choices[0].message.content or ""
     except Exception as e:
         return f"I encountered an error: {str(e)}. Please try again."

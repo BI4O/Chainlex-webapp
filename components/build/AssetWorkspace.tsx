@@ -8,6 +8,7 @@ import { ActionBar } from './ActionBar';
 
 export function AssetWorkspace() {
   const assetData = useLexstudioStore((state) => state.assetData);
+  const updateAssetData = useLexstudioStore((state) => state.updateAssetData);
 
   return (
     <div className="flex flex-col h-full bg-[#f0f2f5] overflow-hidden">
@@ -18,7 +19,7 @@ export function AssetWorkspace() {
 
       {/* 2. Metadata Card */}
       <div className="px-6 pb-4">
-        <MetadataCard assetData={assetData} />
+        <MetadataCard assetData={assetData} onUpdateAssetData={updateAssetData} />
       </div>
 
       {/* 3. Preview Content Card */}

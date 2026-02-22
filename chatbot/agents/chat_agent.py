@@ -1,30 +1,28 @@
 """
-LangChain Chat Agent for Lexstudio with Streaming Support
+Chat Agent for Lexstudio with Streaming Support
+Uses openai client directly for compatibility with third-party API providers.
 """
 
-from langchain.agents import create_agent, AgentState
-from langchain_openai import ChatOpenAI
-from langchain.tools import tool, ToolRuntime
-from langgraph.types import Command
-from langchain.messages import ToolMessage
+from openai import AsyncOpenAI, OpenAI
 from dotenv import load_dotenv
-from typing import Optional, AsyncIterator
+from typing import AsyncIterator
 import os
 
-# Load environment variables
 load_dotenv()
 
-# Initialize LLM with environment variables
-llm = ChatOpenAI(
-    model=os.getenv("MODEL_NAME"),
-    temperature=0.7,
+_async_client = AsyncOpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
     base_url=os.getenv("OPENAI_BASE_URL"),
 )
 
-# System prompt for Chat Mode
-CHAT_SYSTEM_PROMPT = """
-You are Lexstudio AI, an expert assistant for Real World Asset (RWA) tokenization.
+_sync_client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    base_url=os.getenv("OPENAI_BASE_URL"),
+)
+
+MODEL = os.getenv("MODEL_NAME", "gpt-4o")
+
+CHAT_SYSTEM_PROMPT = """You are Lexstudio AI, an expert assistant for Real World Asset (RWA) tokenization.
 
 ## CRITICAL: Language Rule
 **You MUST respond in the SAME language as the user's input.**
@@ -36,109 +34,52 @@ You are Lexstudio AI, an expert assistant for Real World Asset (RWA) tokenizatio
 - Be concise and professional. Maximum 3-4 sentences per response unless detailed explanation is requested.
 - Use bullet points for lists, not long paragraphs.
 - Get straight to the point. No filler words or excessive politeness.
-- Use simple language. Avoid jargon unless necessary.
 
 ## Your Role
 - Answer RWA, tokenization, and blockchain questions precisely
 - If users want to create an asset, briefly suggest switching to Build Mode
 - Provide actionable, specific advice
 
-Keep responses under 100 words unless the question requires detailed explanation.
-"""
+Keep responses under 100 words unless the question requires detailed explanation."""
 
-# Define a simple tool for demonstration
-@tool
-def get_rwa_info(topic: str, runtime: ToolRuntime) -> Command:
-    """Get information about RWA topics"""
-    tool_call_id = runtime.tool_call_id
 
-    info = {
-        "tokenization": "RWA tokenization converts real-world assets into digital tokens on blockchain.",
-        "compliance": "RWA projects must comply with securities regulations like SEC rules.",
-        "benefits": "Benefits include fractional ownership, liquidity, and 24/7 trading.",
-    }
+def _build_messages(user_input: str, history: list) -> list:
+    messages = [{"role": "system", "content": CHAT_SYSTEM_PROMPT}]
+    for msg in history:
+        role = msg.get("role", "user")
+        content = msg.get("content", "")
+        if role in ("user", "assistant"):
+            messages.append({"role": role, "content": content})
+    messages.append({"role": "user", "content": user_input})
+    return messages
 
-    content = info.get(topic.lower(), f"Information about {topic} in RWA context.")
-
-    return Command(update={
-        "messages": [
-            ToolMessage(content=content, tool_call_id=tool_call_id)
-        ]
-    })
-
-# Create chat agent
-chat_agent = create_agent(
-    model=llm,
-    tools=[get_rwa_info],
-    system_prompt=CHAT_SYSTEM_PROMPT,
-    state_schema=AgentState,
-)
 
 async def stream_chat_agent(user_input: str, history: list) -> AsyncIterator[str]:
-    """
-    Stream the chat agent response token by token
-
-    Args:
-        user_input: User's message
-        history: List of previous messages
-
-    Yields:
-        Token strings as they are generated
-    """
+    """Stream chat response token by token."""
     try:
-        # Convert history to LangChain message format
-        messages = []
-        for msg in history:
-            messages.append(msg.get("content", ""))
-
-        # Add current user input
-        messages.append(user_input)
-
-        # Stream agent with astream_events
-        async for event in chat_agent.astream_events(
-            {"messages": messages},
-            version="v2"
-        ):
-            # Filter for LLM token events
-            if event["event"] == "on_chat_model_stream":
-                chunk = event["data"]["chunk"]
-                if hasattr(chunk, 'content') and chunk.content:
-                    yield chunk.content
-
+        messages = _build_messages(user_input, history)
+        stream = await _async_client.chat.completions.create(
+            model=MODEL,
+            messages=messages,
+            stream=True,
+        )
+        async for chunk in stream:
+            delta = chunk.choices[0].delta.content if chunk.choices else None
+            if delta:
+                yield delta
     except Exception as e:
         yield f"\n\nError: {str(e)}"
 
+
 def run_chat_agent(user_input: str, history: list) -> str:
-    """
-    Run the chat agent with user input and history (non-streaming version)
-
-    Args:
-        user_input: User's message
-        history: List of previous messages
-
-    Returns:
-        AI's response message
-    """
+    """Non-streaming fallback."""
     try:
-        # Convert history to LangChain message format
-        messages = []
-        for msg in history:
-            messages.append(msg.get("content", ""))
-
-        # Add current user input
-        messages.append(user_input)
-
-        # Run agent
-        state = chat_agent.invoke({"messages": messages})
-
-        # Extract last AI message
-        if state and "messages" in state:
-            last_message = state["messages"][-1]
-            if hasattr(last_message, 'content'):
-                return last_message.content
-            return str(last_message)
-
-        return "I'm here to help with RWA and tokenization questions!"
-
+        messages = _build_messages(user_input, history)
+        response = _sync_client.chat.completions.create(
+            model=MODEL,
+            messages=messages,
+            stream=False,
+        )
+        return response.choices[0].message.content or ""
     except Exception as e:
         return f"I encountered an error: {str(e)}. Please try again."

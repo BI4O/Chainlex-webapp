@@ -450,6 +450,12 @@ export function InputBox() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit(e as unknown as React.FormEvent);
+              }
+            }}
             placeholder={
               isGenerating
                 ? "AI 正在生成内容，请稍候..."

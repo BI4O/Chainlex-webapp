@@ -12,6 +12,22 @@ export interface Session {
   messages: Message[];
   createdAt: number;
   updatedAt: number;
+  // Per-session workspace state
+  assetData?: AssetData;
+  whitepaperContent?: string;
+  contractContent?: string;
+  currentStep?: number;
+  completedSteps?: number[];
+  phase?: Phase;
+}
+
+export interface UploadedFile {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  content: string;   // text extracted from file (for AI context), truncated to 2000 chars
+  uploadedAt: number;
 }
 
 export interface AssetData {
@@ -23,6 +39,9 @@ export interface AssetData {
   legalStructure?: string;
   complianceStatus?: string;
   totalSupply?: number;
+  jurisdictions?: string[];
+  uploadedFiles?: UploadedFile[];
+  onboardingCompleted?: boolean;
 }
 
 export type Mode = 'chat' | 'build';
@@ -70,6 +89,10 @@ export interface LexstudioStore {
   // Sidebar state
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (collapsed: boolean) => void;
+
+  // Onboarding modal
+  showOnboardingModal: boolean;
+  setShowOnboardingModal: (show: boolean) => void;
 
   // AI generation state
   isGenerating: boolean;

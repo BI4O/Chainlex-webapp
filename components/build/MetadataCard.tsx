@@ -1,14 +1,54 @@
 'use client';
 
-import { useState } from 'react';
-import { AssetData } from '@/lib/types';
+import { useRef, useState } from 'react';
+import { AssetData, UploadedFile } from '@/lib/types';
+
+const JURISDICTION_LABELS: Record<string, string> = {
+  HK: '🇭🇰 HK',
+  UAE: '🇦🇪 UAE',
+  US: '🇺🇸 US',
+  SG: '🇸🇬 SG',
+};
+
+const ACCEPTED_TYPES = '.pdf,.docx,.xlsx,.txt';
 
 interface MetadataCardProps {
   assetData: AssetData;
+  onUpdateAssetData?: (data: Partial<AssetData>) => void;
 }
 
-export function MetadataCard({ assetData }: MetadataCardProps) {
+export function MetadataCard({ assetData, onUpdateAssetData }: MetadataCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (files: FileList | null) => {
+    if (!files || !onUpdateAssetData) return;
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const raw = e.target?.result as string;
+        const newFile: UploadedFile = {
+          id: `file-${Date.now()}-${Math.random()}`,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          content: raw ? raw.slice(0, 2000) : '',
+          uploadedAt: Date.now(),
+        };
+        onUpdateAssetData({
+          uploadedFiles: [...(assetData.uploadedFiles ?? []), newFile],
+        });
+      };
+      reader.readAsText(file);
+    });
+  };
+
+  const removeFile = (id: string) => {
+    if (!onUpdateAssetData) return;
+    onUpdateAssetData({
+      uploadedFiles: (assetData.uploadedFiles ?? []).filter((f) => f.id !== id),
+    });
+  };
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm">
@@ -67,12 +107,12 @@ export function MetadataCard({ assetData }: MetadataCardProps) {
       {/* Expanded Content */}
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="px-5 pb-4 pt-2 border-t border-gray-100">
+        <div className="px-5 pb-4 pt-2 border-t border-gray-100 space-y-4">
+          {/* Basic metadata */}
           <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-            {/* Asset Name */}
             <div>
               <label className="font-body text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Asset Name
@@ -82,7 +122,6 @@ export function MetadataCard({ assetData }: MetadataCardProps) {
               </p>
             </div>
 
-            {/* Asset Type */}
             <div>
               <label className="font-body text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Type
@@ -92,7 +131,6 @@ export function MetadataCard({ assetData }: MetadataCardProps) {
               </p>
             </div>
 
-            {/* Description */}
             <div className="col-span-2">
               <label className="font-body text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Description
@@ -101,9 +139,74 @@ export function MetadataCard({ assetData }: MetadataCardProps) {
                 {assetData.description || 'No description provided'}
               </p>
             </div>
-
-            {/* Additional metadata can be added here */}
           </div>
+
+          {/* Jurisdictions */}
+          {assetData.jurisdictions && assetData.jurisdictions.length > 0 && (
+            <div>
+              <label className="font-body text-xs font-medium text-gray-500 uppercase tracking-wider block mb-2">
+                📍 Jurisdictions
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {assetData.jurisdictions.map((j) => (
+                  <span
+                    key={j}
+                    className="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#324998]/10 text-[#324998]"
+                  >
+                    {JURISDICTION_LABELS[j] ?? j}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Materials */}
+          {assetData.onboardingCompleted && (
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="font-body text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  📎 Materials
+                </label>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-xs text-[#324998] hover:underline font-medium"
+                >
+                  + Upload
+                </button>
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={ACCEPTED_TYPES}
+                multiple
+                className="hidden"
+                onChange={(e) => handleFileSelect(e.target.files)}
+              />
+
+              {assetData.uploadedFiles && assetData.uploadedFiles.length > 0 ? (
+                <ul className="space-y-1.5">
+                  {assetData.uploadedFiles.map((f) => (
+                    <li
+                      key={f.id}
+                      className="flex items-center justify-between px-3 py-1.5 bg-gray-50 rounded-lg border border-[#E5E7EB]"
+                    >
+                      <span className="text-xs text-gray-700 truncate max-w-[200px]">{f.name}</span>
+                      <button
+                        onClick={() => removeFile(f.id)}
+                        className="ml-2 text-gray-400 hover:text-red-500 text-base leading-none transition-colors"
+                        aria-label="Remove file"
+                      >
+                        ×
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-xs text-gray-400 italic">No files uploaded</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
