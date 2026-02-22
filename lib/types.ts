@@ -17,6 +17,7 @@ export interface Session {
 export interface AssetData {
   name?: string;
   type?: string;
+  description?: string;
   valuation?: number;
   yieldRate?: number;
   legalStructure?: string;
