@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "predev": "node -e \"const {execSync}=require('child_process');try{const r=execSync('netstat -ano | findstr :3000 | findstr LISTENING',{encoding:'utf8'});const m=r.match(/(\\d+)\\s*$/m);if(m)execSync('taskkill /F /PID '+m[1],{stdio:'ignore'})}catch(e){}try{const r=execSync('netstat -ano | findstr :8000 | findstr LISTENING',{encoding:'utf8'});const m=r.match(/(\\d+)\\s*$/m);if(m)execSync('taskkill /F /PID '+m[1],{stdio:'ignore'})}catch(e){}\"",
+    "dev": "concurrently -n \"front,back\" -c \"blue,green\" \"pnpm front:dev\" \"pnpm back:dev\"",
+    "front:dev": "next dev",
+    "back:dev": "cd chatbot && python main.py",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -24,6 +27,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",

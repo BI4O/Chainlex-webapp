@@ -55,7 +55,9 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
     set((state) => ({
       mode,
       phase: mode === 'build' ? 'unified' : state.phase,
-      showOnboardingModal: mode === 'build',
+      // Don't show onboarding modal immediately when switching modes
+      // It will be triggered when user tries to send a message in build mode
+      showOnboardingModal: false,
       // Sync mode into current session
       sessions: state.sessions.map(s =>
         s.id === state.currentSessionId ? { ...s, mode } : s
@@ -79,11 +81,11 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
         : s
     );
 
-    const isBuild = state.mode === 'build';
+    // New session always starts in Chat Mode
     const newSession: Session = {
       id: `session-${Date.now()}`,
       title: 'New Chat',
-      mode: state.mode,
+      mode: 'chat',
       messages: [],
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -99,6 +101,7 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
     set({
       sessions: [newSession, ...updatedSessions],
       currentSessionId: newSession.id,
+      mode: 'chat',
       messages: [],
       assetData: {},
       whitepaperContent: '',
@@ -107,7 +110,7 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
       currentStep: 0,
       completedSteps: [],
       phase: 'unified',
-      showOnboardingModal: isBuild,
+      showOnboardingModal: false,
       contractDiff: { added: [], modified: [] },
     });
 
@@ -150,7 +153,7 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
           sessions: newSessions,
           currentSessionId: nextSession.id,
           ...workspaceFromSession(nextSession),
-          showOnboardingModal: false,
+          showOnboardingModal: nextSession.mode === 'build' && !nextSession.assetData?.onboardingCompleted,
           contractDiff: { added: [], modified: [] },
         });
       } else {

@@ -25,18 +25,28 @@ export function InputBox() {
   const updateContract = useLexstudioStore((state) => state.updateContract);
   const updateArchMap = useLexstudioStore((state) => state.updateArchMap);
 
-  // Sidebar state for dynamic positioning
+  // Sidebar state for centering calculation
   const sidebarCollapsed = useLexstudioStore((state) => state.sidebarCollapsed);
 
   // AI generation state (global)
   const isGenerating = useLexstudioStore((state) => state.isGenerating);
   const setIsGenerating = useLexstudioStore((state) => state.setIsGenerating);
 
+  // Onboarding modal control
+  const setShowOnboardingModal = useLexstudioStore((state) => state.setShowOnboardingModal);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || loading || isGenerating) return;
 
     const userInput = input.trim();
+
+    // In Build Mode, check if onboarding is completed before sending
+    if (mode === 'build' && !assetData?.onboardingCompleted) {
+      setShowOnboardingModal(true);
+      return;
+    }
+
     setInput('');
     setLoading(true);
     setIsGenerating(true);
@@ -44,6 +54,20 @@ export function InputBox() {
 
     addMessage({ role: 'user', content: userInput });
     addMessage({ role: 'assistant', content: '...' });
+
+    // Create AbortController for timeout handling
+    const controller = new AbortController();
+    const CONNECTION_TIMEOUT = 30000; // 30s to establish connection
+    const READ_TIMEOUT = 90000; // 90s max total wait time
+
+    const connectionTimeoutId = setTimeout(() => {
+      controller.abort(new Error('Connection timeout - server not responding'));
+    }, CONNECTION_TIMEOUT);
+
+    // Overall timeout
+    const overallTimeoutId = setTimeout(() => {
+      controller.abort(new Error('Request timeout - took too long'));
+    }, READ_TIMEOUT);
 
     try {
       setLoading(false);
@@ -76,20 +100,34 @@ export function InputBox() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
+        signal: controller.signal,
       });
 
+      // Clear connection timeout once we get a response
+      clearTimeout(connectionTimeoutId);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`Server error (${response.status})`);
       }
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
 
-      if (!reader) throw new Error('No reader available');
+      if (!reader) throw new Error('No response stream available');
+
+      let lastReceivedTime = Date.now();
+      const STREAM_TIMEOUT = 60000; // 60s without data = timeout
 
       while (true) {
+        // Check if stream has been silent too long
+        if (Date.now() - lastReceivedTime > STREAM_TIMEOUT) {
+          throw new Error('Stream timeout - no data received');
+        }
+
         const { done, value } = await reader.read();
         if (done) break;
+
+        lastReceivedTime = Date.now(); // Update last received time
 
         const chunk = decoder.decode(value);
         const lines = chunk.split('\n');
@@ -101,6 +139,9 @@ export function InputBox() {
 
             try {
               const parsed = JSON.parse(data);
+              if (parsed.error) {
+                throw new Error(parsed.error);
+              }
               if (parsed.token) {
                 streamingContentRef.current += parsed.token;
                 const currentMessages = useLexstudioStore.getState().messages;
@@ -121,13 +162,23 @@ export function InputBox() {
         }
       }
     } catch (error) {
+      // Clear all timeouts
+      clearTimeout(connectionTimeoutId);
+      clearTimeout(overallTimeoutId);
+
+      const errorMessage = error instanceof Error
+        ? (error.name === 'AbortError'
+            ? 'Request timed out. The AI service may be slow or unavailable. Please try again.'
+            : error.message)
+        : 'Unknown error occurred';
+
       const currentMessages = useLexstudioStore.getState().messages;
       useLexstudioStore.setState({
         messages: [
           ...currentMessages.slice(0, -1),
           {
             ...currentMessages[currentMessages.length - 1],
-            content: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+            content: `⚠️ ${errorMessage}`
           }
         ]
       });
@@ -332,17 +383,22 @@ export function InputBox() {
 
   const isBuildMode = mode === 'build';
 
+  // Calculate sidebar width for proper centering in main content area
+  // Sidebar: 192px (w-48) when expanded, 24px (w-6) when collapsed
   const sidebarWidth = sidebarCollapsed ? 24 : 192;
-  const leftPosition = isBuildMode ? 'auto' : `${sidebarWidth + 32}px`;
 
   return (
     <div
       className={`
         bottom-6
-        ${isBuildMode ? 'absolute left-6 right-6' : 'fixed right-12 mx-6'}
+        ${isBuildMode ? 'absolute left-6 right-6' : 'fixed'}
       `}
       style={{
-        left: isBuildMode ? undefined : leftPosition,
+        // Center within the main content area (viewport width minus sidebar)
+        left: isBuildMode ? undefined : `calc(${sidebarWidth}px + (100vw - ${sidebarWidth}px) / 2)`,
+        transform: isBuildMode ? undefined : 'translateX(-50%)',
+        width: isBuildMode ? undefined : '100%',
+        maxWidth: isBuildMode ? undefined : '54rem', // ~864px, slightly wider than message container for visual balance
         transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
       }}
     >

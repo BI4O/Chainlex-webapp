@@ -18,6 +18,7 @@ export function OnboardingModal() {
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedJurisdictions, setSelectedJurisdictions] = useState<string[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Reset internal state every time the modal is shown
   useEffect(() => {
@@ -25,8 +26,17 @@ export function OnboardingModal() {
       setStep(1);
       setSelectedJurisdictions([]);
       setUploadedFiles([]);
+      // Trigger animation after a brief delay
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsVisible(true);
+        });
+      });
+    } else {
+      setIsVisible(false);
     }
   }, [showOnboardingModal]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!showOnboardingModal) return null;
@@ -61,18 +71,38 @@ export function OnboardingModal() {
     setUploadedFiles((prev) => prev.filter((f) => f.id !== id));
   };
 
+  const handleClose = () => {
+    setIsVisible(false);
+    setTimeout(() => {
+      setShowOnboardingModal(false);
+    }, 200); // Match transition duration
+  };
+
   const handleFinish = () => {
     updateAssetData({
       jurisdictions: selectedJurisdictions,
       uploadedFiles,
       onboardingCompleted: true,
     });
-    setShowOnboardingModal(false);
+    handleClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center pointer-events-none">
-      <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-lg w-[480px] max-w-[90vw] pointer-events-auto">
+    <div
+      className={`fixed inset-0 bg-black/40 z-50 flex items-center justify-center pointer-events-none transition-opacity duration-200 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+    >
+      <div
+        className={`bg-white rounded-2xl border border-[#E5E7EB] shadow-lg w-[480px] max-w-[90vw] pointer-events-auto relative transition-all duration-200 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+      >
+        {/* Close button */}
+        <button
+          onClick={handleClose}
+          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors duration-150"
+          aria-label="Close"
+        >
+          ×
+        </button>
+
         {/* Progress dots */}
         <div className="flex justify-center gap-2 pt-6 pb-2">
           <div className={`w-2 h-2 rounded-full ${step === 1 ? 'bg-[#324998]' : 'bg-[#324998]'}`} />

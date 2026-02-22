@@ -4,21 +4,28 @@ Task-oriented agent for Build Mode with 10-step unified workflow.
 Uses openai client directly for compatibility with third-party API providers.
 """
 
-from openai import AsyncOpenAI, OpenAI
+from openai import AsyncOpenAI, OpenAI, APITimeoutError, APIConnectionError
 from dotenv import load_dotenv
 from typing import AsyncIterator, Dict, Any
 import os
+import asyncio
 
 load_dotenv()
+
+# Configure timeout settings
+REQUEST_TIMEOUT = 90.0  # 90 seconds timeout for build mode (longer responses)
+CONNECT_TIMEOUT = 15.0  # 15 seconds to establish connection
 
 _async_client = AsyncOpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
     base_url=os.getenv("OPENAI_BASE_URL"),
+    timeout=REQUEST_TIMEOUT,
 )
 
 _sync_client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
     base_url=os.getenv("OPENAI_BASE_URL"),
+    timeout=REQUEST_TIMEOUT,
 )
 
 # Keep llm for generate_step_content / generate_project_title (sync invoke)
@@ -28,6 +35,7 @@ llm = ChatOpenAI(
     temperature=0.7,
     api_key=os.getenv("OPENAI_API_KEY"),
     base_url=os.getenv("OPENAI_BASE_URL"),
+    request_timeout=REQUEST_TIMEOUT,
 )
 
 MODEL = os.getenv("MODEL_NAME", "gpt-4o")
@@ -392,21 +400,34 @@ async def stream_build_agent(
     phase: str,
     asset_data: Dict[str, Any]
 ) -> AsyncIterator[str]:
-    """Stream the build agent response token by token."""
+    """Stream the build agent response token by token with timeout handling."""
     try:
         system_prompt = get_system_prompt(phase, current_step, completed_steps, asset_data)
         messages = _build_messages(user_input, history, system_prompt)
-        stream = await _async_client.chat.completions.create(
-            model=MODEL,
-            messages=messages,
-            stream=True,
+
+        # Create stream with timeout
+        stream = await asyncio.wait_for(
+            _async_client.chat.completions.create(
+                model=MODEL,
+                messages=messages,
+                stream=True,
+            ),
+            timeout=CONNECT_TIMEOUT
         )
+
         async for chunk in stream:
             delta = chunk.choices[0].delta.content if chunk.choices else None
             if delta:
                 yield delta
+
+    except asyncio.TimeoutError:
+        yield "\n\n⚠️ Connection timeout. The AI service is taking too long to respond. Please try again."
+    except APITimeoutError:
+        yield "\n\n⚠️ API timeout. Please check your network connection and try again."
+    except APIConnectionError as e:
+        yield f"\n\n⚠️ Connection error: {str(e)}. Please check if the API endpoint is accessible."
     except Exception as e:
-        yield f"\n\nError: {str(e)}"
+        yield f"\n\n⚠️ Error: {str(e)}"
 
 
 def run_build_agent(
