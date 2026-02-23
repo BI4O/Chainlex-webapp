@@ -1,34 +1,47 @@
 'use client';
 
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
 interface NavItem {
   id: string;
   label: string;
-  active: boolean;
+  href: string;
 }
 
 export function SidebarNav() {
+  const pathname = usePathname();
+
   const navItems: NavItem[] = [
-    { id: 'studio', label: 'Studio', active: true },
-    { id: 'oracle', label: 'Oracle', active: false },
-    { id: 'enforcer', label: 'Enforcer', active: false },
+    { id: 'studio', label: 'Studio', href: '/' },
+    { id: 'oracle', label: 'Oracle', href: '/oracle' },
+    { id: 'enforcer', label: 'Enforcer', href: '/enforcer' },
   ];
+
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return pathname === '/';
+    }
+    return pathname.startsWith(href);
+  };
 
   return (
     <nav className="space-y-1.5">
       {navItems.map((item) => (
-        <button
+        <Link
           key={item.id}
+          href={item.href}
           className={`
-            w-full px-3 py-2 text-left font-body text-xs rounded-md
+            block w-full px-3 py-2 text-left font-body text-xs rounded-md
             transition-all duration-200
-            ${item.active
+            ${isActive(item.href)
               ? 'bg-[#324998] text-white shadow-sm'
               : 'bg-white text-black border border-[#E5E7EB] hover:bg-[#324998] hover:text-white hover:shadow-sm'
             }
           `}
         >
-          {item.active && '● '}{item.label}
-        </button>
+          {isActive(item.href) && '● '}{item.label}
+        </Link>
       ))}
     </nav>
   );
