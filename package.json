@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node -e \"const {execSync}=require('child_process');try{const r=execSync('netstat -ano | findstr :3000 | findstr LISTENING',{encoding:'utf8'});const m=r.match(/(\\d+)\\s*$/m);if(m)execSync('taskkill /F /PID '+m[1],{stdio:'ignore'})}catch(e){}try{const r=execSync('netstat -ano | findstr :8000 | findstr LISTENING',{encoding:'utf8'});const m=r.match(/(\\d+)\\s*$/m);if(m)execSync('taskkill /F /PID '+m[1],{stdio:'ignore'})}catch(e){}\"",
+    "predev": "node scripts/predev.js",
     "dev": "concurrently -n \"front,back\" -c \"blue,green\" \"pnpm front:dev\" \"pnpm back:dev\"",
     "front:dev": "next dev",
     "back:dev": "cd chatbot && python main.py",
