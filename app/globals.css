@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* Quiet Professional / Editorial Minimalism Design System */
 :root {

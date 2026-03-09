@@ -20,6 +20,8 @@ export interface Session {
   completedSteps?: number[];
   phase?: Phase;
   archMapContent?: string;
+  // Example session marker (read-only, cannot be deleted)
+  isExample?: boolean;
 }
 
 export interface UploadedFile {

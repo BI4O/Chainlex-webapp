@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { LexstudioStore, Message, Session, AssetData, Phase, ContractDiff } from './types';
+import { createExampleSession, hasExampleSession } from './exampleSession';
 
 // Helper function to generate session title from first message
 const generateSessionTitle = (messages: Message[]): string => {
@@ -144,6 +145,13 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
 
   deleteSession: (sessionId) => {
     const state = get();
+
+    // Prevent deletion of example session
+    const targetSession = state.sessions.find(s => s.id === sessionId);
+    if (targetSession?.isExample) {
+      return;
+    }
+
     const newSessions = state.sessions.filter(s => s.id !== sessionId);
 
     if (state.currentSessionId === sessionId) {
@@ -371,15 +379,43 @@ export const useLexstudioStore = create<LexstudioStore>((set, get) => ({
     if (typeof window === 'undefined') return;
     const saved = localStorage.getItem('lexstudio-state');
     if (!saved) {
-      get().createSession();
+      // First time user: create example session + new session
+      const exampleSession = createExampleSession();
+      set({
+        sessions: [exampleSession],
+        currentSessionId: exampleSession.id,
+        ...workspaceFromSession(exampleSession),
+        showOnboardingModal: false,
+        contractDiff: { added: [], modified: [] },
+      });
       return;
     }
 
     const stored = JSON.parse(saved);
-    const sessions: Session[] = stored.sessions ?? [];
+    let sessions: Session[] = stored.sessions ?? [];
+
+    // Ensure example session exists and is at the beginning
+    if (!hasExampleSession(sessions)) {
+      const exampleSession = createExampleSession();
+      sessions = [exampleSession, ...sessions];
+    } else {
+      // Move example session to the front if not already
+      const exampleIndex = sessions.findIndex(s => s.id === 'example-session');
+      if (exampleIndex > 0) {
+        const [exampleSession] = sessions.splice(exampleIndex, 1);
+        sessions = [exampleSession, ...sessions];
+      }
+    }
 
     if (sessions.length === 0) {
-      get().createSession();
+      const exampleSession = createExampleSession();
+      set({
+        sessions: [exampleSession],
+        currentSessionId: exampleSession.id,
+        ...workspaceFromSession(exampleSession),
+        showOnboardingModal: false,
+        contractDiff: { added: [], modified: [] },
+      });
       return;
     }
 

@@ -114,16 +114,27 @@ export function SidebarHistory() {
             >
               <button
                 onClick={() => switchSession(session.id)}
-                className="flex-1 text-left"
+                className="flex-1 text-left min-w-0"
               >
-                <div className="truncate">▸ {session.title}</div>
+                <div className="flex items-center gap-1.5 overflow-hidden">
+                  <span className="truncate flex-shrink-0">▸ {session.title.replace('📋 示例: ', '')}</span>
+                  {session.isExample && (
+                    <span className={`flex-shrink-0 text-[9px] px-1.5 py-0.5 rounded font-medium ${
+                      currentSessionId === session.id
+                        ? 'bg-white/20 text-white'
+                        : 'bg-[#324998]/10 text-[#324998]'
+                    }`}>
+                      DEMO
+                    </span>
+                  )}
+                </div>
                 <div className={`text-[10px] truncate ${currentSessionId === session.id ? 'text-white/60' : 'text-gray-400'}`}>
                   {formatRelativeTime(session.updatedAt || session.createdAt)}
                 </div>
               </button>
 
-              {/* Delete button - only show on hover */}
-              {currentSessionId !== session.id && (
+              {/* Delete button - only show on hover and not for example session */}
+              {currentSessionId !== session.id && !session.isExample && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
