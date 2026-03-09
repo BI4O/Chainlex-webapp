@@ -1,20 +1,14 @@
 'use client';
 
 import { Sidebar } from '@/components/layout/Sidebar';
+import { EnforcerDashboard } from '@/components/enforcer/enforcer-dashboard';
 
 export default function EnforcerPage() {
   return (
     <div className="flex h-screen bg-[#f0f2f5]">
       <Sidebar />
-      <main className="flex-1 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="font-body text-4xl font-bold text-[#324998] mb-4">
-            Welcome to Enforcer
-          </h1>
-          <p className="font-body text-gray-500 text-lg">
-            Coming soon
-          </p>
-        </div>
+      <main className="flex-1 overflow-y-auto">
+        <EnforcerDashboard />
       </main>
     </div>
   );
