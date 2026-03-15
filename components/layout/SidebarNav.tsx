@@ -35,8 +35,8 @@ export function SidebarNav() {
             block w-full px-3 py-2 text-left font-body text-xs rounded-md
             transition-all duration-200
             ${isActive(item.href)
-              ? 'bg-[#324998] text-white shadow-sm'
-              : 'bg-white text-black border border-[#E5E7EB] hover:bg-[#324998] hover:text-white hover:shadow-sm'
+              ? 'bg-[var(--accent)] text-white shadow-sm'
+              : 'bg-white text-black border border-[#E5E7EB] hover:bg-[var(--accent)] hover:text-white hover:shadow-sm'
             }
           `}
         >

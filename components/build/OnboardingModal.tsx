@@ -105,8 +105,8 @@ export function OnboardingModal() {
 
         {/* Progress dots */}
         <div className="flex justify-center gap-2 pt-6 pb-2">
-          <div className={`w-2 h-2 rounded-full ${step === 1 ? 'bg-[#324998]' : 'bg-[#324998]'}`} />
-          <div className={`w-2 h-2 rounded-full ${step === 2 ? 'bg-[#324998]' : 'bg-[#E5E7EB]'}`} />
+          <div className={`w-2 h-2 rounded-full ${step === 1 ? 'bg-[var(--accent)]' : 'bg-[var(--accent)]'}`} />
+          <div className={`w-2 h-2 rounded-full ${step === 2 ? 'bg-[var(--accent)]' : 'bg-[#E5E7EB]'}`} />
         </div>
 
         {step === 1 ? (
@@ -129,8 +129,8 @@ export function OnboardingModal() {
                     className={`
                       flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium transition-all duration-150
                       ${selected
-                        ? 'bg-[#324998] text-white border-[#324998]'
-                        : 'bg-white text-gray-900 border-[#E5E7EB] hover:border-[#324998]'
+                        ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
+                        : 'bg-white text-gray-900 border-[#E5E7EB] hover:border-[var(--accent)]'
                       }
                     `}
                   >
@@ -151,7 +151,7 @@ export function OnboardingModal() {
               className={`
                 w-full py-3 rounded-xl text-sm font-semibold transition-all duration-150
                 ${selectedJurisdictions.length > 0
-                  ? 'bg-[#324998] text-white hover:bg-[#2a3d82]'
+                  ? 'bg-[var(--accent)] text-white hover:bg-[#2a3d82]'
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 }
               `}
@@ -171,7 +171,7 @@ export function OnboardingModal() {
 
             {/* Drop zone */}
             <div
-              className="border-2 border-dashed border-[#E5E7EB] rounded-xl p-8 text-center mb-4 hover:border-[#324998] transition-colors duration-150 cursor-pointer"
+              className="border-2 border-dashed border-[#E5E7EB] rounded-xl p-8 text-center mb-4 hover:border-[var(--accent)] transition-colors duration-150 cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
@@ -181,7 +181,7 @@ export function OnboardingModal() {
             >
               <div className="text-3xl mb-2">📄</div>
               <p className="text-sm text-gray-600 font-medium">
-                Drop files here or <span className="text-[#324998]">browse</span>
+                Drop files here or <span className="text-[var(--accent)]">browse</span>
               </p>
               <p className="text-xs text-gray-400 mt-1">
                 PDF, DOCX, XLSX, TXT
@@ -227,7 +227,7 @@ export function OnboardingModal() {
               </button>
               <button
                 onClick={handleFinish}
-                className="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-[#324998] hover:bg-[#2a3d82] transition-colors duration-150"
+                className="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-[var(--accent)] hover:bg-[#2a3d82] transition-colors duration-150"
               >
                 Start Building →
               </button>

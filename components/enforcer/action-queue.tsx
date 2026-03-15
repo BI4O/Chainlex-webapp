@@ -26,7 +26,7 @@ function actionIcon(action: string) {
     case "UNFREEZE":
       return <CheckCircle2 className="h-4 w-4 text-green-500" />;
     case "GENERATE_SAR":
-      return <FileText className="h-4 w-4 text-[#324998]" />;
+      return <FileText className="h-4 w-4 text-[var(--accent)]" />;
     default:
       return <Shield className="h-4 w-4" />;
   }
@@ -138,7 +138,7 @@ export function ActionQueue({ pendingActions, onExecute, onSkip }: ActionQueuePr
                   </Button>
                   <Button
                     size="sm"
-                    className="h-7 text-xs bg-[#324998] hover:bg-[#324998]/80"
+                    className="h-7 text-xs bg-[var(--accent)] hover:bg-[var(--accent)]/80"
                     onClick={() => handleExecute(action.id)}
                     disabled={executingId === action.id}
                   >

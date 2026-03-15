@@ -47,11 +47,11 @@ export function MilestoneTracker() {
                 w-5 h-5 flex-shrink-0 flex items-center justify-center rounded-full
                 border-2 transition-all duration-200 hover:scale-110
                 ${completedSteps.includes(index)
-                  ? 'bg-[#324998] border-[#324998] text-white shadow-sm'
-                  : 'bg-white border-[#324998] text-[#324998] shadow-sm'
+                  ? 'bg-[var(--accent)] border-[var(--accent)] text-white shadow-sm'
+                  : 'bg-white border-[var(--accent)] text-[var(--accent)] shadow-sm'
                 }
                 ${currentStep === index
-                  ? 'ring-2 ring-[#324998] ring-offset-2 ring-offset-[#f0f2f5] shadow-md'
+                  ? 'ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--background-canvas)] shadow-md'
                   : ''
                 }
               `}
@@ -72,9 +72,9 @@ export function MilestoneTracker() {
               pb-3 pt-0.5 font-body text-xs leading-tight cursor-pointer
               transition-colors duration-200
               ${currentStep === index
-                ? 'text-[#324998] font-semibold'
+                ? 'text-[var(--accent)] font-semibold'
                 : completedSteps.includes(index)
-                  ? 'text-[#324998] font-medium'
+                  ? 'text-[var(--accent)] font-medium'
                   : 'text-gray-400'
               }
             `}

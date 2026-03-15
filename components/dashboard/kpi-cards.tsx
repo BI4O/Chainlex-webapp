@@ -16,7 +16,7 @@ type KPICardsProps = {
 
 export function KPICards({ oracleChecks, onChainWrites, highRisk, freezeActions, vaultRejected }: KPICardsProps) {
   const cards: KPI[] = [
-    { value: oracleChecks, label: "Oracle Checks", icon: <Activity className="h-5 w-5 text-[#324998]" />, color: "bg-[#324998]/10" },
+    { value: oracleChecks, label: "Oracle Checks", icon: <Activity className="h-5 w-5 text-[var(--accent)]" />, color: "bg-[var(--accent)]/10" },
     { value: onChainWrites, label: "On-chain Writes", icon: <CheckCircle2 className="h-5 w-5 text-green-500" />, color: "bg-green-500/10" },
     { value: highRisk, label: "High Risk", icon: <AlertTriangle className="h-5 w-5 text-orange-500" />, color: "bg-orange-500/10" },
     { value: freezeActions, label: "FREEZE Actions", icon: <Shield className="h-5 w-5 text-red-500" />, color: "bg-red-500/10" },

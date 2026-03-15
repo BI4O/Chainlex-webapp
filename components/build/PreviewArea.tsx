@@ -30,7 +30,7 @@ export function PreviewArea() {
   return (
     <div className="flex-1 border border-[#E5E7EB] p-8 lg:p-10 overflow-y-auto bg-white rounded-xl shadow-sm">
       {content ? (
-        <div className="prose prose-sm max-w-none prose-headings:font-body prose-headings:font-bold prose-headings:text-black prose-h1:text-2xl prose-h1:border-b prose-h1:border-[#E5E7EB] prose-h1:pb-2 prose-h2:text-xl prose-h2:mt-6 prose-h2:text-[#324998] prose-h3:text-lg prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-strong:font-bold prose-hr:border-[#E5E7EB] prose-hr:my-4">
+        <div className="prose prose-sm max-w-none prose-headings:font-body prose-headings:font-bold prose-headings:text-black prose-h1:text-2xl prose-h1:border-b prose-h1:border-[#E5E7EB] prose-h1:pb-2 prose-h2:text-xl prose-h2:mt-6 prose-h2:text-[var(--accent)] prose-h3:text-lg prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-strong:font-bold prose-hr:border-[#E5E7EB] prose-hr:my-4">
           <ReactMarkdown>{content}</ReactMarkdown>
         </div>
       ) : (

@@ -26,7 +26,7 @@ function actionColor(action: EnforcementAction): string {
     case "FORCE_TRANSFER":
       return "text-purple-500 bg-purple-50";
     case "GENERATE_SAR":
-      return "text-[#324998] bg-[#324998]/10";
+      return "text-[var(--accent)] bg-[var(--accent)]/10";
     default:
       return "text-gray-500 bg-gray-50";
   }
@@ -68,11 +68,11 @@ export function AuditTrail({ entries }: AuditTrailProps) {
               {/* Operator Icon */}
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  entry.operator === "SYSTEM" ? "bg-[#324998]/10" : "bg-green-100"
+                  entry.operator === "SYSTEM" ? "bg-[var(--accent)]/10" : "bg-green-100"
                 }`}
               >
                 {entry.operator === "SYSTEM" ? (
-                  <Bot className="h-3.5 w-3.5 text-[#324998]" />
+                  <Bot className="h-3.5 w-3.5 text-[var(--accent)]" />
                 ) : (
                   <User className="h-3.5 w-3.5 text-green-600" />
                 )}
@@ -113,7 +113,7 @@ export function AuditTrail({ entries }: AuditTrailProps) {
 
         {/* View All Link */}
         <div className="mt-3 pt-3 border-t border-[#E5E7EB]">
-          <button className="text-xs text-[#324998] hover:underline font-medium">
+          <button className="text-xs text-[var(--accent)] hover:underline font-medium">
             View Full Audit Log →
           </button>
         </div>

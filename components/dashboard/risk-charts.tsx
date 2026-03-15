@@ -72,8 +72,8 @@ function RiskScoreTrend({ attestations }: RiskChartsProps) {
           <svg width="100%" height="100%" viewBox="0 0 350 170" className="absolute inset-0" preserveAspectRatio="xMidYMid meet">
             <defs>
               <linearGradient id="oracleAreaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="rgba(50, 73, 152, 0.3)" />
-                <stop offset="100%" stopColor="rgba(50, 73, 152, 0.0)" />
+                <stop offset="0%" stopColor="rgba(99, 102, 241, 0.3)" />
+                <stop offset="100%" stopColor="rgba(99, 102, 241, 0.0)" />
               </linearGradient>
             </defs>
             {/* Grid lines */}
@@ -100,7 +100,7 @@ function RiskScoreTrend({ attestations }: RiskChartsProps) {
               fill="url(#oracleAreaGrad)"
             />
             {/* Line */}
-            <polyline points={pointsString} fill="none" stroke="#324998" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <polyline points={pointsString} fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             {/* Points */}
             {points.map((point, index) => (
               <g key={index}>
@@ -108,7 +108,7 @@ function RiskScoreTrend({ attestations }: RiskChartsProps) {
                   cx={point.x}
                   cy={point.y}
                   r={hoveredPoint === index ? 6 : 3}
-                  fill={point.value >= HIGH_THRESHOLD ? "#ef4444" : "#324998"}
+                  fill={point.value >= HIGH_THRESHOLD ? "#ef4444" : "var(--accent)"}
                   stroke="#fff"
                   strokeWidth="2"
                   className="cursor-pointer transition-all duration-200"
@@ -132,7 +132,7 @@ function RiskScoreTrend({ attestations }: RiskChartsProps) {
                 x={point.x}
                 y={startY + 15}
                 textAnchor="middle"
-                fill={hoveredPoint === index ? "#324998" : "#525252"}
+                fill={hoveredPoint === index ? "var(--accent)" : "#525252"}
                 fontSize="9"
                 fontWeight={hoveredPoint === index ? "500" : "normal"}
               >

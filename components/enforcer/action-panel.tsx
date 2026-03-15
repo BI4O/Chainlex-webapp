@@ -37,8 +37,8 @@ const ACTION_BUTTONS: { action: EnforcementAction; label: string; icon: React.Re
     action: "GENERATE_SAR",
     label: "Generate SAR",
     icon: <FileText className="h-4 w-4" />,
-    color: "bg-[#324998]",
-    hoverColor: "hover:bg-[#324998]/80",
+    color: "bg-[var(--accent)]",
+    hoverColor: "hover:bg-[var(--accent)]/80",
   },
 ];
 
@@ -88,7 +88,7 @@ export function ActionPanel({ onAction }: ActionPanelProps) {
               className={`flex-1 h-10 rounded-lg border px-3 py-2 text-sm font-mono transition-all duration-200 focus:outline-none focus:ring-2 ${
                 address && !isValidAddress
                   ? "border-red-300 bg-red-50/30 focus:ring-red-200"
-                  : "border-[#E5E7EB] bg-white focus:ring-[#324998]/20"
+                  : "border-[#E5E7EB] bg-white focus:ring-[var(--accent)]/20"
               }`}
             />
             {address && isValidAddress && (

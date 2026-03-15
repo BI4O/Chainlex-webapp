@@ -10,6 +10,21 @@ const JURISDICTION_LABELS: Record<string, string> = {
   SG: '🇸🇬 SG',
 };
 
+// Asset type color mapping
+const ASSET_TYPE_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  'Real Estate': { bg: 'bg-green-500/10', text: 'text-green-600', border: 'border-green-500/30' },
+  'Bond': { bg: 'bg-purple-500/10', text: 'text-purple-600', border: 'border-purple-500/30' },
+  'Equity': { bg: 'bg-blue-500/10', text: 'text-blue-600', border: 'border-blue-500/30' },
+  'Art': { bg: 'bg-orange-500/10', text: 'text-orange-600', border: 'border-orange-500/30' },
+  'default': { bg: 'bg-[var(--accent)]/10', text: 'text-[var(--accent)]', border: 'border-[var(--accent)]/30' },
+};
+
+function getAssetTypeStyle(type: string | undefined) {
+  if (!type) return ASSET_TYPE_COLORS.default;
+  const key = Object.keys(ASSET_TYPE_COLORS).find(k => type.toLowerCase().includes(k.toLowerCase()));
+  return key ? ASSET_TYPE_COLORS[key] : ASSET_TYPE_COLORS.default;
+}
+
 const ACCEPTED_TYPES = '.pdf,.docx,.xlsx,.txt';
 
 interface MetadataCardProps {
@@ -20,6 +35,7 @@ interface MetadataCardProps {
 export function MetadataCard({ assetData, onUpdateAssetData }: MetadataCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const assetStyle = getAssetTypeStyle(assetData.type);
 
   const handleFileSelect = (files: FileList | null) => {
     if (!files || !onUpdateAssetData) return;
@@ -59,9 +75,9 @@ export function MetadataCard({ assetData, onUpdateAssetData }: MetadataCardProps
       >
         <div className="flex items-center gap-2.5">
           {/* Icon */}
-          <div className="w-7 h-7 rounded-lg bg-[#324998]/10 flex items-center justify-center flex-shrink-0">
+          <div className={`w-7 h-7 rounded-lg ${assetStyle.bg} flex items-center justify-center flex-shrink-0 border ${assetStyle.border}`}>
             <svg
-              className="w-3.5 h-3.5 text-[#324998]"
+              className={`w-3.5 h-3.5 ${assetStyle.text}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -148,14 +164,22 @@ export function MetadataCard({ assetData, onUpdateAssetData }: MetadataCardProps
                 📍 Jurisdictions
               </label>
               <div className="flex flex-wrap gap-2">
-                {assetData.jurisdictions.map((j) => (
-                  <span
-                    key={j}
-                    className="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#324998]/10 text-[#324998]"
-                  >
-                    {JURISDICTION_LABELS[j] ?? j}
-                  </span>
-                ))}
+                {assetData.jurisdictions.map((j) => {
+                  const jurColors: Record<string, string> = {
+                    HK: 'bg-red-500/10 text-red-600 border-red-500/30',
+                    UAE: 'bg-amber-500/10 text-amber-600 border-amber-500/30',
+                    US: 'bg-blue-500/10 text-blue-600 border-blue-500/30',
+                    SG: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30',
+                  };
+                  return (
+                    <span
+                      key={j}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-medium border ${jurColors[j] || 'bg-gray-100 text-gray-600 border-gray-300'}`}
+                    >
+                      {JURISDICTION_LABELS[j] ?? j}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -169,7 +193,7 @@ export function MetadataCard({ assetData, onUpdateAssetData }: MetadataCardProps
                 </label>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="text-xs text-[#324998] hover:underline font-medium"
+                  className="text-xs text-[var(--accent)] hover:underline font-medium"
                 >
                   + Upload
                 </button>

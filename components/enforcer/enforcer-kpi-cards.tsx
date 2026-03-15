@@ -43,8 +43,8 @@ export function EnforcerKPICards({
     {
       value: sarGenerated,
       label: "SAR Generated",
-      icon: <FileText className="h-5 w-5 text-[#324998]" />,
-      color: "bg-[#324998]/10",
+      icon: <FileText className="h-5 w-5 text-[var(--accent)]" />,
+      color: "bg-[var(--accent)]/10",
     },
     {
       value: autoEnforced,

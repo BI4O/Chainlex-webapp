@@ -140,9 +140,9 @@ export function PreviewCard() {
           themeVariables: {
             primaryColor: '#E1E9F6',
             primaryTextColor: '#000000',
-            primaryBorderColor: '#324998',
-            lineColor: '#324998',
-            secondaryColor: '#f0f2f5',
+            primaryBorderColor: 'var(--accent)',
+            lineColor: 'var(--accent)',
+            secondaryColor: 'var(--background-canvas)',
             tertiaryColor: '#ffffff',
           },
         });
@@ -165,35 +165,47 @@ export function PreviewCard() {
     return () => { cancelled = true; };
   }, [previewTab, displayArchMap]);
 
-  const tabs: { id: PreviewTab; label: string }[] = [
-    { id: 'whitepaper', label: 'Whitepaper' },
-    { id: 'contract', label: 'Contract' },
-    { id: 'arch-map', label: 'Arch-Map' },
+  const tabs: { id: PreviewTab; label: string; color: string }[] = [
+    { id: 'whitepaper', label: 'Whitepaper', color: 'green' },
+    { id: 'contract', label: 'Contract', color: 'purple' },
+    { id: 'arch-map', label: 'Arch-Map', color: 'blue' },
   ];
+
+  const getTabColorClasses = (color: string) => {
+    const colors: Record<string, { active: string; underline: string }> = {
+      green: { active: 'text-green-600', underline: 'bg-green-500' },
+      purple: { active: 'text-purple-600', underline: 'bg-purple-500' },
+      blue: { active: 'text-[var(--accent)]', underline: 'bg-[var(--accent)]' },
+    };
+    return colors[color] || colors.blue;
+  };
 
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm flex flex-col h-full overflow-hidden">
       {/* Tabs */}
       <div className="flex border-b border-gray-200 px-1 flex-shrink-0">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setPreviewTab(tab.id)}
-            className={`
-              relative px-5 py-3 font-body text-sm font-medium
-              transition-all duration-150
-              ${previewTab === tab.id
-                ? 'text-[#324998]'
-                : 'text-gray-500 hover:text-gray-700'
-              }
-            `}
-          >
-            {tab.label}
-            {previewTab === tab.id && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#324998]" />
-            )}
-          </button>
-        ))}
+        {tabs.map((tab) => {
+          const colorClasses = getTabColorClasses(tab.color);
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setPreviewTab(tab.id)}
+              className={`
+                relative px-5 py-3 font-body text-sm font-medium
+                transition-all duration-150
+                ${previewTab === tab.id
+                  ? colorClasses.active
+                  : 'text-gray-500 hover:text-gray-700'
+                }
+              `}
+            >
+              {tab.label}
+              {previewTab === tab.id && (
+                <div className={`absolute bottom-0 left-0 right-0 h-0.5 ${colorClasses.underline}`} />
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Content Area */}
@@ -210,7 +222,7 @@ export function PreviewCard() {
                     </h1>
                   ),
                   h2: ({ children }) => (
-                    <h2 className="text-[#324998] border-l-4 border-[#324998] pl-3 mt-8 mb-3 text-base font-semibold">
+                    <h2 className="text-[var(--accent)] border-l-4 border-[var(--accent)] pl-3 mt-8 mb-3 text-base font-semibold">
                       {children}
                     </h2>
                   ),
@@ -245,7 +257,7 @@ export function PreviewCard() {
                     <td className="px-3 py-2 border border-[#E5E7EB]">{children}</td>
                   ),
                   code: ({ children }) => (
-                    <code className="bg-gray-100 text-[#324998] px-1 py-0.5 rounded text-xs font-mono">{children}</code>
+                    <code className="bg-gray-100 text-[var(--accent)] px-1 py-0.5 rounded text-xs font-mono">{children}</code>
                   ),
                 }}
               >

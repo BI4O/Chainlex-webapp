@@ -17,7 +17,7 @@ export function SARPreview({ report }: SARPreviewProps) {
   const statusColor = {
     draft: "text-yellow-600 bg-yellow-50",
     ready: "text-green-600 bg-green-50",
-    submitted: "text-[#324998] bg-[#324998]/10",
+    submitted: "text-[var(--accent)] bg-[var(--accent)]/10",
   };
 
   return (
@@ -101,7 +101,7 @@ export function SARPreview({ report }: SARPreviewProps) {
           </Button>
           <Button
             size="sm"
-            className="flex-1 bg-[#324998] hover:bg-[#324998]/80"
+            className="flex-1 bg-[var(--accent)] hover:bg-[var(--accent)]/80"
           >
             <Send className="h-4 w-4 mr-2" />
             Submit to Regulator

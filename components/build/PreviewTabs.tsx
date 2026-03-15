@@ -23,8 +23,8 @@ export function PreviewTabs() {
             px-6 py-3 font-body text-sm font-medium
             transition-all duration-200
             ${previewTab === tab.id
-              ? 'border-b-2 border-[#324998] text-[#324998] -mb-px'
-              : 'text-gray-500 hover:text-[#324998]'
+              ? 'border-b-2 border-[var(--accent)] text-[var(--accent)] -mb-px'
+              : 'text-gray-500 hover:text-[var(--accent)]'
             }
           `}
         >

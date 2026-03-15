@@ -42,7 +42,7 @@ export function ActionBar() {
             rounded-lg transition-all duration-200
             flex items-center justify-center gap-2
             ${workflowComplete
-              ? 'bg-[#324998] text-white hover:bg-[#2a3d7f] active:scale-[0.98] shadow-sm hover:shadow-md'
+              ? 'bg-[var(--accent)] text-white hover:bg-[#2a3d7f] active:scale-[0.98] shadow-sm hover:shadow-md'
               : 'bg-gray-100 text-gray-400 cursor-not-allowed'
             }
           `}
@@ -66,7 +66,7 @@ export function ActionBar() {
             rounded-lg transition-all duration-200
             flex items-center justify-center gap-2
             ${workflowComplete
-              ? 'bg-[#324998] text-white hover:bg-[#2a3d7f] active:scale-[0.98] shadow-sm hover:shadow-md'
+              ? 'bg-[var(--accent)] text-white hover:bg-[#2a3d7f] active:scale-[0.98] shadow-sm hover:shadow-md'
               : 'bg-gray-100 text-gray-400 cursor-not-allowed'
             }
           `}

@@ -10,7 +10,7 @@ export default function Home() {
   const mode = useLexstudioStore((state) => state.mode);
 
   return (
-    <div className="flex h-screen bg-[#f0f2f5]">
+    <div className="flex h-screen bg-[var(--background-canvas)]">
       <Sidebar />
       <main className="flex-1">
         {mode === 'chat' ? <ChatInterface /> : <BuildInterface />}

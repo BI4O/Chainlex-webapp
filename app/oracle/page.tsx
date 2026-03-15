@@ -5,7 +5,7 @@ import { OracleDashboard } from '@/components/dashboard/oracle-dashboard';
 
 export default function OraclePage() {
   return (
-    <div className="flex h-screen bg-[#f0f2f5]">
+    <div className="flex h-screen bg-[var(--background-canvas)]">
       <Sidebar />
       <main className="flex-1 overflow-y-auto">
         <OracleDashboard />

@@ -405,7 +405,7 @@ export function InputBox() {
       <div className={`
         border transition-all duration-300 ease-in-out rounded-lg shadow-md
         ${isBuildMode
-          ? 'bg-[#324998] border-[#324998]'
+          ? 'bg-[var(--accent)] border-[var(--accent)]'
           : 'bg-white border-[#E5E7EB]'
         }
       `}>
@@ -427,7 +427,7 @@ export function InputBox() {
           >
             <div className={`
               relative w-24 h-6 border transition-all duration-300 rounded overflow-hidden
-              ${isBuildMode ? 'border-white' : 'border-[#324998]'}
+              ${isBuildMode ? 'border-white' : 'border-[var(--accent)]'}
             `}>
               {/* Sliding background */}
               <div
@@ -435,7 +435,7 @@ export function InputBox() {
                   absolute top-0 h-full w-1/2 transition-all duration-300 ease-out
                   ${isBuildMode
                     ? 'left-1/2 bg-white'
-                    : 'left-0 bg-[#324998]'
+                    : 'left-0 bg-[var(--accent)]'
                   }
                 `}
               />
@@ -454,7 +454,7 @@ export function InputBox() {
                 <div className={`
                   flex-1 flex items-center justify-center transition-all duration-300
                   ${isBuildMode
-                    ? 'text-[#324998] font-bold'
+                    ? 'text-[var(--accent)] font-bold'
                     : 'text-black'
                   }
                 `}>
@@ -503,14 +503,14 @@ export function InputBox() {
               ${loading || isGenerating
                 ? isBuildMode
                   ? 'bg-white/30 text-white border-white/30 cursor-not-allowed'
-                  : 'bg-[#324998]/30 text-[#324998] border-[#324998]/30 cursor-not-allowed'
+                  : 'bg-[var(--accent)]/30 text-[var(--accent)] border-[var(--accent)]/30 cursor-not-allowed'
                 : !input.trim()
                   ? isBuildMode
                     ? 'bg-white/30 text-white border-white/30 cursor-not-allowed'
-                    : 'bg-[#324998]/30 text-[#324998] border-[#324998]/30 cursor-not-allowed'
+                    : 'bg-[var(--accent)]/30 text-[var(--accent)] border-[var(--accent)]/30 cursor-not-allowed'
                   : isBuildMode
-                    ? 'bg-white text-[#324998] border-white hover:bg-[#324998] hover:text-white hover:scale-110 shadow-sm hover:shadow-md'
-                    : 'bg-[#324998] text-white border-[#324998] hover:bg-black hover:border-black hover:scale-110 shadow-sm hover:shadow-md'
+                    ? 'bg-white text-[var(--accent)] border-white hover:bg-[var(--accent)] hover:text-white hover:scale-110 shadow-sm hover:shadow-md'
+                    : 'bg-[var(--accent)] text-white border-[var(--accent)] hover:bg-black hover:border-black hover:scale-110 shadow-sm hover:shadow-md'
               }
             `}
           >
@@ -518,7 +518,7 @@ export function InputBox() {
               <span className={`inline-block w-4 h-4 border-2 rounded-full animate-spin ${
                 isBuildMode
                   ? 'border-white border-t-transparent'
-                  : 'border-[#324998] border-t-transparent'
+                  : 'border-[var(--accent)] border-t-transparent'
               }`} />
             ) : '↑'}
           </button>

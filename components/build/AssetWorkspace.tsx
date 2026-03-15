@@ -11,7 +11,7 @@ export function AssetWorkspace() {
   const updateAssetData = useLexstudioStore((state) => state.updateAssetData);
 
   return (
-    <div className="flex flex-col h-full bg-[#f0f2f5] overflow-hidden">
+    <div className="flex flex-col h-full bg-[var(--background-canvas)] overflow-hidden">
       {/* 1. Progress Card */}
       <div className="px-4 pt-4 pb-2">
         <ProgressCard />
@@ -28,7 +28,7 @@ export function AssetWorkspace() {
       </div>
 
       {/* 4. Action Bar */}
-      <div className="px-4 pb-4 pt-1 bg-gradient-to-t from-[#f0f2f5] via-[#f0f2f5] to-transparent">
+      <div className="px-4 pb-4 pt-1 bg-gradient-to-t from-[var(--background-canvas)] via-[var(--background-canvas)] to-transparent">
         <ActionBar />
       </div>
     </div>

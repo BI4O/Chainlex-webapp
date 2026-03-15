@@ -110,7 +110,7 @@ export function DeployModal({ isOpen, onClose }: DeployModalProps) {
                     const chain = EVM_CHAINS.find((c) => c.id === Number(e.target.value));
                     if (chain) setSelectedChain(chain);
                   }}
-                  className="w-full h-12 px-4 pr-10 font-body text-sm bg-white border border-[#E5E7EB] rounded-xl appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#324998]/20 focus:border-[#324998] transition-all"
+                  className="w-full h-12 px-4 pr-10 font-body text-sm bg-white border border-[#E5E7EB] rounded-xl appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 focus:border-[var(--accent)] transition-all"
                 >
                   {EVM_CHAINS.map((chain) => (
                     <option key={chain.id} value={chain.id}>
@@ -126,9 +126,9 @@ export function DeployModal({ isOpen, onClose }: DeployModalProps) {
               </div>
 
               {/* Info Box */}
-              <div className="mt-4 p-4 bg-[#f0f2f5] rounded-xl">
+              <div className="mt-4 p-4 bg-[var(--background-canvas)] rounded-xl">
                 <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 text-[#324998] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-[var(--accent)] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div className="font-body text-sm text-gray-600">
@@ -144,8 +144,8 @@ export function DeployModal({ isOpen, onClose }: DeployModalProps) {
             <div className="py-4">
               {/* Chain Info */}
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-[#324998]/10 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-[#324998]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                   </svg>
                 </div>
@@ -159,11 +159,11 @@ export function DeployModal({ isOpen, onClose }: DeployModalProps) {
               <div className="space-y-2">
                 <div className="flex justify-between font-body text-xs">
                   <span className="text-gray-500">Deploying...</span>
-                  <span className="text-[#324998] font-medium">{Math.round(progress)}%</span>
+                  <span className="text-[var(--accent)] font-medium">{Math.round(progress)}%</span>
                 </div>
                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#324998] rounded-full transition-all duration-100 ease-out"
+                    className="h-full bg-[var(--accent)] rounded-full transition-all duration-100 ease-out"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
@@ -205,7 +205,7 @@ export function DeployModal({ isOpen, onClose }: DeployModalProps) {
             </button>
             <button
               onClick={() => setDeployState('deploying')}
-              className="flex-1 h-10 px-4 font-body text-sm font-medium text-white bg-[#324998] rounded-lg hover:bg-[#2a3d7f] transition-all"
+              className="flex-1 h-10 px-4 font-body text-sm font-medium text-white bg-[var(--accent)] rounded-lg hover:bg-[#2a3d7f] transition-all"
             >
               Deploy
             </button>

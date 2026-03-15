@@ -13,7 +13,7 @@ export function Sidebar() {
       <div className="w-6 h-screen flex flex-col items-center justify-start pt-3 bg-white border-r border-[#E5E7EB]">
         <button
           onClick={() => setSidebarCollapsed(false)}
-          className="w-5 h-10 flex items-center justify-center bg-[#f0f2f5] text-black font-mono text-xs hover:bg-[#E5E7EB] transition-all duration-200 rounded-md"
+          className="w-5 h-10 flex items-center justify-center bg-[var(--background-canvas)] text-black font-mono text-xs hover:bg-[#E5E7EB] transition-all duration-200 rounded-md"
           title="展开侧边栏"
         >
           ▶

@@ -19,8 +19,8 @@
   --foreground-hover: #FFFFFF;  /* Text on inverted cards */
   --foreground-hover-muted: #FFFFFFCC;  /* 80% opacity */
 
-  /* Accent Color - Navy Blue */
-  --accent: #324998;
+  /* Accent Color - Indigo */
+  --accent: #6366f1;
 
   /* Borders - Lighter for Apple style */
   --border-default: #E5E7EB;

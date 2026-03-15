@@ -81,7 +81,7 @@ export function SidebarHistory() {
       <div className="px-3 py-2 border-b border-[#E5E7EB]">
         <button
           onClick={createSession}
-          className="w-full px-3 py-1.5 bg-[#324998] text-white font-body text-xs font-medium hover:bg-black border border-[#324998] hover:border-black transition-all duration-200 rounded-md shadow-sm hover:shadow-md"
+          className="w-full px-3 py-1.5 bg-[var(--accent)] text-white font-body text-xs font-medium hover:bg-black border border-[var(--accent)] hover:border-black transition-all duration-200 rounded-md shadow-sm hover:shadow-md"
         >
           + New Chat
         </button>
@@ -107,8 +107,8 @@ export function SidebarHistory() {
                 px-3 py-1.5 font-body text-xs rounded-md
                 transition-all duration-200
                 ${currentSessionId === session.id
-                  ? 'bg-[#324998] text-white shadow-sm'
-                  : 'hover:bg-[#f0f2f5] cursor-pointer'
+                  ? 'bg-[var(--accent)] text-white shadow-sm'
+                  : 'hover:bg-[var(--background-canvas)] cursor-pointer'
                 }
               `}
             >
@@ -122,7 +122,7 @@ export function SidebarHistory() {
                     <span className={`flex-shrink-0 text-[9px] px-1.5 py-0.5 rounded font-medium ${
                       currentSessionId === session.id
                         ? 'bg-white/20 text-white'
-                        : 'bg-[#324998]/10 text-[#324998]'
+                        : 'bg-[var(--accent)]/10 text-[var(--accent)]'
                     }`}>
                       DEMO
                     </span>
